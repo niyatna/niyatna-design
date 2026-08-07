@@ -82,7 +82,7 @@ test('[P0] @critical onboarding lets AMR Cloud sign in and complete setup after 
   });
 });
 
-test('[P0] signed-out onboarding requires Cloud authorization before model source selection', async ({ page }) => {
+test('[P0] signed-out onboarding keeps Local Agent and BYOK available without Cloud authorization', async ({ page }) => {
   const config = await wireOnboardingMocks(page, {
     amrAvailable: true,
     initialLoggedIn: false,
@@ -92,14 +92,13 @@ test('[P0] signed-out onboarding requires Cloud authorization before model sourc
   await seedOnboardingConfig(page, config);
   await gotoOnboarding(page);
 
-  // Execution-source selection belongs behind Cloud identity. Signed-out
-  // users see only the login gate; Local Agent and BYOK become available
-  // after authentication resolves.
+  // Cloud sign-in is optional. Anonymous users must still be able to choose a
+  // local agent or BYOK, matching the product's offline / self-hosted contract.
   const primary = cloudPrimaryButton(page);
   await expect(primary).toBeVisible();
   await expect(primary).toHaveText(/Sign in to Open Design|登录 Open Design/i);
-  await expect(page.getByRole('button', { name: /Local (coding )?agent/i })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: /Bring Your Own Key/i })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /Local (coding )?agent/i })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Bring Your Own Key/i })).toBeVisible();
   await expect.poll(() => page.evaluate(() => window.__amrOnboardingLoginCalls ?? 0)).toBe(0);
 });
 
@@ -384,7 +383,7 @@ test('[P0] onboarding AMR runtime selection carries into the first Home run requ
   });
 });
 
-test('[P0] completed BYOK setup stays usable while the unrelated Cloud session is signed out', async ({ page }) => {
+test('[P0] completed BYOK setup resumes after passive Cloud reauthentication without reopening the chooser', async ({ page }) => {
   const config = await wireOnboardingMocks(page, {
     amrAvailable: true,
     initialLoggedIn: false,
@@ -402,13 +401,12 @@ test('[P0] completed BYOK setup stays usable while the unrelated Cloud session i
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await waitForLoadingToClear(page);
   await dismissPrivacyDialog(page);
-  await expect(page).toHaveURL(/\/$/);
-  await expect(page.getByTestId('home-hero-input')).toBeVisible();
+  await expect(page).toHaveURL(/\/onboarding$/);
+
+  await clickCloudPrimary(page);
+  await expectOnboardingFinished(page);
   await expect(page.getByRole('heading', { name: /Choose your model source|选择模型来源/i })).toHaveCount(0);
-  // PRODUCT INVARIANT: Cloud identity gates Open Design Cloud execution only.
-  // A configured BYOK runtime neither redirects to onboarding nor starts a
-  // passive Cloud login merely because the independent AMR status is signed out.
-  await expect.poll(() => page.evaluate(() => window.__amrOnboardingLoginCalls ?? 0)).toBe(0);
+  await expect.poll(() => page.evaluate(() => window.__amrOnboardingLoginCalls ?? 0)).toBe(1);
   await pollStoredConfig(page).toMatchObject({
     mode: 'api',
     apiKey: 'persisted-byok-key',
@@ -418,55 +416,7 @@ test('[P0] completed BYOK setup stays usable while the unrelated Cloud session i
   });
 });
 
-test('[P0] definitively expired Cloud auth returns to the existing sign-in gate without a dismissible modal', async ({ page }) => {
-  const config = await wireOnboardingMocks(page, {
-    amrAvailable: true,
-    initialLoggedIn: true,
-    sessionState: 'reauth_required',
-  });
-  Object.assign(config, {
-    agentId: 'amr',
-    onboardingCompleted: true,
-  } satisfies Partial<OnboardingConfig>);
-  await mockAmrPersonalWorkspace(page);
-  await seedOnboardingConfig(page, config);
-
-  await page.goto('/', { waitUntil: 'domcontentloaded' });
-  await waitForLoadingToClear(page);
-  await dismissPrivacyDialog(page);
-
-  await expect(page).toHaveURL(/\/onboarding$/, { timeout: T.long });
-  await expect(connectLandingHeading(page)).toBeVisible();
-  await expect(page.getByRole('alertdialog')).toHaveCount(0);
-  await pollStoredConfig(page).toMatchObject({
-    agentId: 'amr',
-    onboardingCompleted: true,
-  });
-});
-
-test('[P0] definitively expired Cloud auth also gates project deep links', async ({ page }) => {
-  const config = await wireOnboardingMocks(page, {
-    amrAvailable: true,
-    initialLoggedIn: true,
-    sessionState: 'reauth_required',
-  });
-  Object.assign(config, {
-    agentId: 'amr',
-    onboardingCompleted: true,
-  } satisfies Partial<OnboardingConfig>);
-  await mockAmrPersonalWorkspace(page);
-  await seedOnboardingConfig(page, config);
-
-  await page.goto('/projects/expired-auth-project', { waitUntil: 'domcontentloaded' });
-  await waitForLoadingToClear(page);
-  await dismissPrivacyDialog(page);
-
-  await expect(page).toHaveURL(/\/onboarding$/, { timeout: T.long });
-  await expect(connectLandingHeading(page)).toBeVisible();
-  await expect(page.getByRole('alertdialog')).toHaveCount(0);
-});
-
-test('[P0] active Cloud sign-out clears execution setup, preserves unrelated preferences, and returns to sign-in', async ({ page }) => {
+test('[P0] active Cloud sign-out clears execution setup, preserves unrelated preferences, and returns to onboarding', async ({ page }) => {
   const config = await wireOnboardingMocks(page, {
     amrAvailable: true,
     initialLoggedIn: true,
@@ -493,9 +443,7 @@ test('[P0] active Cloud sign-out clears execution setup, preserves unrelated pre
   await expect(page.getByTestId('sign-out-confirm-dialog')).toBeVisible();
   await page.getByTestId('sign-out-confirm-accept').click();
 
-  await expect(connectLandingHeading(page)).toBeVisible();
-  await expect(cloudPrimaryButton(page)).toHaveText(/Sign in to Open Design|登录 Open Design/i);
-  await expect(page.getByTestId('home-hero-input')).toHaveCount(0);
+  await expect(page).toHaveURL(/\/onboarding$/);
   await pollStoredConfig(page).toMatchObject({
     mode: 'daemon',
     apiKey: '',
@@ -505,7 +453,11 @@ test('[P0] active Cloud sign-out clears execution setup, preserves unrelated pre
   });
 });
 
-test('[P0] signed-out users are redirected from Home to Cloud sign-in', async ({ page }) => {
+test('[P0] signed-out users can open Home directly without completing onboarding', async ({ page }) => {
+  test.fail(
+    true,
+    'First-run routing still sends an uncompleted onboarding config to /onboarding, independently of Cloud sign-in.',
+  );
   const config = await wireOnboardingMocks(page, {
     amrAvailable: true,
     initialLoggedIn: false,
@@ -517,22 +469,24 @@ test('[P0] signed-out users are redirected from Home to Cloud sign-in', async ({
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await waitForLoadingToClear(page);
   await dismissPrivacyDialog(page);
-  await expect(page).toHaveURL(/\/onboarding$/);
-  await expect(connectLandingHeading(page)).toBeVisible();
-  await expect(cloudPrimaryButton(page)).toHaveText(/Sign in to Open Design|登录 Open Design/i);
-  await expect(page.getByTestId('home-hero-input')).toHaveCount(0);
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByTestId('home-hero-input')).toBeVisible({ timeout: T.long });
   await expect.poll(() => page.evaluate(() => window.__amrOnboardingLoginCalls ?? 0)).toBe(0);
 });
 
 for (const destination of [
-  { name: 'Community', path: '/community' },
-  { name: 'Projects', path: '/projects' },
-  { name: 'Design Systems', path: '/design-systems' },
-  { name: 'Plugins', path: '/plugins' },
-  { name: 'Integrations', path: '/integrations' },
-  { name: 'Settings', path: '/settings' },
+  { name: 'Community', path: '/community', selector: '[data-testid="entry-nav-community"]' },
+  { name: 'Projects', path: '/projects', selector: '[data-testid="entry-view-projects"][data-active="true"]' },
+  { name: 'Design Systems', path: '/design-systems', selector: '[data-testid="entry-view-design-systems"][data-active="true"]' },
+  { name: 'Plugins', path: '/plugins', selector: '[data-testid="entry-view-plugins"][data-active="true"]' },
+  { name: 'Integrations', path: '/integrations', selector: '.integrations-view' },
+  { name: 'Settings', path: '/settings', selector: '.settings-page-surface' },
 ] as const) {
-  test(`[P0] signed-out users are redirected from ${destination.name} to Cloud sign-in`, async ({ page }) => {
+  test(`[P0] signed-out users can open ${destination.name} directly`, async ({ page }) => {
+    test.fail(
+      true,
+      `First-run routing still sends an uncompleted onboarding config to /onboarding before ${destination.name} renders.`,
+    );
     const config = await wireOnboardingMocks(page, {
       amrAvailable: true,
       initialLoggedIn: false,
@@ -544,9 +498,8 @@ for (const destination of [
     await waitForLoadingToClear(page);
     await dismissPrivacyDialog(page);
 
-    await expect(page).toHaveURL(/\/onboarding$/);
-    await expect(connectLandingHeading(page)).toBeVisible();
-    await expect(cloudPrimaryButton(page)).toHaveText(/Sign in to Open Design|登录 Open Design/i);
+    await expect(page).toHaveURL(new RegExp(`${destination.path}$`));
+    await expect(page.locator(destination.selector)).toBeVisible({ timeout: T.long });
     await expect.poll(() => page.evaluate(() => window.__amrOnboardingLoginCalls ?? 0)).toBe(0);
   });
 }
@@ -879,7 +832,6 @@ async function wireOnboardingMocks(
     initialLoggedIn: boolean;
     failAllStatusPolls?: boolean;
     keepAmrLoginIncomplete?: boolean;
-    sessionState?: 'signed_out' | 'authenticated' | 'reauth_required';
     delaySignedOutStatusMs?: number;
     agentsDelayMs?: number;
     codexModels?: Array<{ id: string; label: string }>;
@@ -1002,8 +954,6 @@ async function wireOnboardingMocks(
         ? {
             loggedIn: true,
             loginInFlight: false,
-            sessionState: options.sessionState ?? 'authenticated',
-            credentialRevision: 'onboarding-test-credential',
             profile: 'local',
             configPath: '/tmp/.amr/config.json',
             user: { id: 'user-1', email: 'onboarding@example.com', plan: 'free' },
@@ -1011,8 +961,6 @@ async function wireOnboardingMocks(
         : {
             loggedIn: false,
             loginInFlight,
-            sessionState: 'signed_out',
-            credentialRevision: 'signed-out',
             profile: 'local',
             configPath: '/tmp/.amr/config.json',
             user: null,

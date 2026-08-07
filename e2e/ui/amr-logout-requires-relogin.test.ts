@@ -3,6 +3,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import type { Locator } from '@playwright/test';
+import type { ProjectWorkspaceScopeResponse } from '@open-design/contracts';
+
 import { expect, test } from '@/playwright/suite';
 
 import { writeFakeVelaBin } from '@/amr';
@@ -15,6 +17,7 @@ import {
   openSettingsDialog,
   putAppConfig,
   seedBrowserConfig,
+  sendPrompt,
 } from '@/playwright/amr';
 
 test.describe.configure({ timeout: T.xlong });
@@ -50,7 +53,7 @@ function amrAgentToggle(settings: Locator): Locator {
   return settings.getByTestId('settings-agent-card-amr').getByRole('button').first();
 }
 
-test('[P0] after local Sign out, the app returns to Cloud sign-in without clearing setup', async ({ page }) => {
+test('[P0] after local Sign out, the app stays usable and AMR runs require re-login without clearing setup', async ({ page }) => {
   await stubCatalogsEmpty(page);
   const root = join(tmpdir(), `open-design-amr-logout-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
   const reloginVelaBin = await writeFakeVelaBin(join(root, 'bin-relogin'), {
@@ -129,15 +132,16 @@ test('[P0] after local Sign out, the app returns to Cloud sign-in without cleari
     const response = await fetch('/api/integrations/vela/logout', { method: 'POST' });
     if (!response.ok) throw new Error(`logout failed: ${response.status}`);
   });
-  // A definitive signed-out Cloud status now gates the entry on sign-in.
-  // This is passive session loss (the logout endpoint was called directly),
-  // so the saved AMR setup must survive for reauthentication.
+  // Passive session loss (the logout endpoint was called directly) must not
+  // evict the user from the app: Home stays reachable without an account and
+  // the saved AMR setup survives for reauthentication. Only the AMR run below
+  // demands a fresh sign-in.
   await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await expect(page.getByTestId('home-hero-input')).toBeVisible({ timeout: T.long });
+  await expect(page).toHaveURL(/\/$/);
   await expect(
     page.getByRole('heading', { name: /Sign in to Open Design|登录 Open Design/i }),
-  ).toBeVisible({ timeout: T.long });
-  await expect(page.getByRole('button', { name: /Sign in to Open Design|登录 Open Design/i })).toBeVisible();
-  await expect(page.getByTestId('home-hero-input')).toHaveCount(0);
+  ).toHaveCount(0);
   await expect.poll(() => page.evaluate(() => {
     const raw = window.localStorage.getItem('open-design:config');
     return raw ? JSON.parse(raw) : null;
@@ -145,6 +149,34 @@ test('[P0] after local Sign out, the app returns to Cloud sign-in without cleari
     agentId: 'amr',
     onboardingCompleted: true,
   });
+  const reloginConfig = {
+    ...config,
+    agentCliEnv: {
+      amr: { VELA_BIN: reloginVelaBin },
+    },
+  };
+  await putAppConfig(page, reloginConfig);
+  await page.evaluate((next) => {
+    window.localStorage.setItem('open-design:config', JSON.stringify(next));
+  }, reloginConfig);
+  const projectScopeResponse = page.waitForResponse((response) => {
+    const url = new URL(response.url());
+    return response.request().method() === 'GET'
+      && url.pathname === `/api/projects/${projectId}/workspace-scope`;
+  });
+  await gotoProject(page, projectId);
+  const scopeResponse = await projectScopeResponse;
+  const scopeBody = (await scopeResponse.json()) as ProjectWorkspaceScopeResponse;
+  expect(scopeResponse.ok(), JSON.stringify(scopeBody)).toBeTruthy();
+  expect(scopeBody.scope).toMatchObject({ kind: 'personal', projectId });
+  await sendPrompt(page, 'AMR logout should require relogin');
+
+  const balanceGate = page.getByTestId('amr-balance-dialog');
+  await expect(balanceGate).toBeVisible({ timeout: 15_000 });
+  await expect(balanceGate).toContainText(/Sign in to start creating/i);
+  await expect(balanceGate).toContainText(/sign in and this task can start right away/i);
+  await expect(balanceGate.getByRole('button', { name: /^Sign in$/i })).toBeVisible();
+
   const configResponse = await page.request.get('/api/app-config');
   expect(configResponse.ok(), await configResponse.text()).toBeTruthy();
   const body = (await configResponse.json()) as { config?: { agentId?: string } };

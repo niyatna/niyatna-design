@@ -3,6 +3,14 @@ import { describe, expect, it } from "vitest";
 import { resolvePackagedWindowTitle } from "../src/window-title.js";
 
 describe("resolvePackagedWindowTitle", () => {
+  it("uses an explicit packaged product name ahead of release-channel defaults", () => {
+    expect(resolvePackagedWindowTitle({
+      appVersion: "0.18.1",
+      namespace: "open-open-design",
+      productName: "Open Open Design",
+    })).toBe("Open Open Design");
+  });
+
   it("keeps stable windows on the public product name", () => {
     expect(resolvePackagedWindowTitle({ appVersion: "0.10.0", namespace: "release-stable-win" })).toBe("Open Design");
   });

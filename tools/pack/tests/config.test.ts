@@ -8,8 +8,14 @@ const savedPosthogKey = process.env.POSTHOG_KEY;
 const savedPosthogHost = process.env.POSTHOG_HOST;
 const savedAmrProfile = process.env.OPEN_DESIGN_AMR_PROFILE;
 const savedVelaWebUrl = process.env.OD_VELA_WEB_URL;
+const savedProductName = process.env.OD_PACKAGED_PRODUCT_NAME;
 
 afterEach(() => {
+  if (savedProductName == null) {
+    delete process.env.OD_PACKAGED_PRODUCT_NAME;
+  } else {
+    process.env.OD_PACKAGED_PRODUCT_NAME = savedProductName;
+  }
   if (savedVelaWebUrl == null) {
     delete process.env.OD_VELA_WEB_URL;
   } else {
@@ -35,6 +41,20 @@ afterEach(() => {
   } else {
     process.env.OPEN_DESIGN_AMR_PROFILE = savedAmrProfile;
   }
+});
+
+describe("resolveToolPackConfig packaged product name", () => {
+  it("bakes a validated fork product name when explicitly configured", () => {
+    process.env.OD_PACKAGED_PRODUCT_NAME = " Open Open Design ";
+    expect(resolveToolPackConfig("win", { namespace: "open-open-design" }).productName).toBe("Open Open Design");
+  });
+
+  it("rejects product names that are unsafe in Windows install paths", () => {
+    process.env.OD_PACKAGED_PRODUCT_NAME = "Open/Design";
+    expect(() => resolveToolPackConfig("win", { namespace: "open-open-design" })).toThrow(
+      /OD_PACKAGED_PRODUCT_NAME contains unsupported characters/,
+    );
+  });
 });
 
 describe("resolveToolPackConfig AMR profile", () => {

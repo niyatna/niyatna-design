@@ -126,13 +126,9 @@ export function UpdaterPopup({
   const [panelOpen, setPanelOpen] = useState(false);
   const [installState, setInstallState] = useState<InstallState>('idle');
   const [installError, setInstallError] = useState<string | null>(null);
-  const [allowSilentUpdatesChecked, setAllowSilentUpdatesChecked] = useState(() => allowSilentUpdates ?? true);
+  const [allowSilentUpdatesChecked, setAllowSilentUpdatesChecked] = useState(() => allowSilentUpdates === true);
   const [silentUpdatesPersistError, setSilentUpdatesPersistError] = useState<string | null>(null);
   const [silentUpdatesPersisting, setSilentUpdatesPersisting] = useState(false);
-  // Seed bookkeeping must outlive effect dependency churn: a successful
-  // parent setConfig(true) re-runs the seed effect mid-flight; we must not
-  // cancel the in-flight finally (that stranded the checkbox disabled).
-  const seedInFlightRef = useRef(false);
   const mountedRef = useRef(true);
 
   useEffect(() => {
@@ -166,45 +162,10 @@ export function UpdaterPopup({
 
   useEffect(() => {
     if (installState !== 'idle') return;
-    // Until a successful daemon GET has landed, undefined may still mean
-    // "loading a saved false" — keep the optimistic default only for display.
     if (!silentUpdatePreferenceReady && allowSilentUpdates === undefined) return;
-    setAllowSilentUpdatesChecked(allowSilentUpdates ?? true);
+    setAllowSilentUpdatesChecked(allowSilentUpdates === true);
     setSilentUpdatesPersistError(null);
   }, [allowSilentUpdates, installState, silentUpdatePreferenceReady]);
-
-  // Prompt show-up seed: only after a *successful* daemon config fetch.
-  // If the preference is still undefined then, write the default (true) once.
-  // Bookkeeping uses a ref so a successful parent re-render mid-flight does
-  // not cancel clearing `silentUpdatesPersisting`.
-  useEffect(() => {
-    if (!panelOpen) return;
-    if (!silentUpdatePreferenceReady) return;
-    if (allowSilentUpdates !== undefined) return;
-    if (onAllowSilentUpdatesChange == null) return;
-    if (seedInFlightRef.current) return;
-
-    seedInFlightRef.current = true;
-    setAllowSilentUpdatesChecked(true);
-    setSilentUpdatesPersistError(null);
-    setSilentUpdatesPersisting(true);
-    void Promise.resolve(onAllowSilentUpdatesChange(true))
-      .catch(() => {
-        if (!mountedRef.current) return;
-        setSilentUpdatesPersistError(t('settings.autosaveError'));
-      })
-      .finally(() => {
-        seedInFlightRef.current = false;
-        if (!mountedRef.current) return;
-        setSilentUpdatesPersisting(false);
-      });
-  }, [
-    allowSilentUpdates,
-    onAllowSilentUpdatesChange,
-    panelOpen,
-    silentUpdatePreferenceReady,
-    t,
-  ]);
 
   const handleSilentUpdatesChange = useCallback(
     async (next: boolean) => {

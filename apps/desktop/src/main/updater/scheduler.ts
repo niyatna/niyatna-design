@@ -8,9 +8,10 @@ import type { DesktopUpdater, DesktopUpdaterLogger } from "../updater.js";
 /**
  * @module updater-scheduler
  *
- * Recurring auto-check scheduling for the desktop updater: initial delay,
- * per-channel polling interval, failure backoff, and the one-shot startup
- * silent payload update. Owns no updater state beyond timer bookkeeping.
+ * Recurring update-check scheduling for the desktop updater: initial delay,
+ * per-channel polling interval, failure backoff, preference-gated downloads,
+ * and the one-shot startup silent payload update. Owns no updater state beyond
+ * timer bookkeeping.
  */
 
 const MIN_SCHEDULED_POLL_DELAY_MS = 1000;
@@ -21,7 +22,7 @@ export type DesktopUpdaterScheduler = {
   stop(reason?: string): void;
 };
 
-type StartupSilentPayloadUpdateOptions = {
+type AutomaticUpdatesOptions = {
   isEnabled(): Promise<boolean>;
   requestQuit(): void;
 };
@@ -34,7 +35,7 @@ export function createDesktopUpdaterScheduler(
     initialDelayMs: number;
     intervalMs: number;
     logger?: DesktopUpdaterLogger;
-    startupSilentPayloadUpdate?: StartupSilentPayloadUpdateOptions;
+    automaticUpdates?: AutomaticUpdatesOptions;
   },
 ): DesktopUpdaterScheduler {
   const logger = options.logger ?? console;
@@ -45,6 +46,16 @@ export function createDesktopUpdaterScheduler(
   let unsubscribe: (() => void) | null = null;
   let warnedZeroDelay = false;
   let startupTickPending = true;
+
+  const readAutomaticUpdatesEnabled = async (): Promise<boolean> => {
+    if (options.automaticUpdates == null) return false;
+    try {
+      return await options.automaticUpdates.isEnabled();
+    } catch (preferenceError) {
+      logger.warn("[open-design updater] automatic update preference read failed; keeping automatic updates disabled", preferenceError);
+      return false;
+    }
+  };
 
   const clearTimer = () => {
     if (timer == null) return;
@@ -99,13 +110,19 @@ export function createDesktopUpdaterScheduler(
     const startupTick = startupTickPending;
     startupTickPending = false;
     try {
-      const startupReady = startupTick && options.startupSilentPayloadUpdate != null
+      const automaticUpdatesEnabled = await readAutomaticUpdatesEnabled();
+      const startupReady = startupTick && automaticUpdatesEnabled
         ? await updater.status()
         : null;
-      status = await updater.checkForUpdates();
+      status = await updater.checkForUpdates(
+        options.automaticUpdates == null
+          ? undefined
+          : { autoDownload: automaticUpdatesEnabled, autoOpen: false },
+      );
       if (
         startupTick
-        && options.startupSilentPayloadUpdate != null
+        && automaticUpdatesEnabled
+        && options.automaticUpdates != null
         && startupReady?.installResult == null
         && startupReady?.state === DESKTOP_UPDATE_STATES.DOWNLOADED
         && startupReady.artifact?.type === "payload"
@@ -118,12 +135,11 @@ export function createDesktopUpdaterScheduler(
         && status.capabilities.canApplyInPlace
       ) {
         try {
-          const enabled = await options.startupSilentPayloadUpdate.isEnabled();
-          if (enabled) {
+          if (await readAutomaticUpdatesEnabled()) {
             status = await updater.installUpdate();
             if (status.installResult != null) {
               stop("silent-payload-installed");
-              options.startupSilentPayloadUpdate.requestQuit();
+              options.automaticUpdates.requestQuit();
               return;
             }
           }

@@ -415,7 +415,8 @@ describe('mergeDaemonConfig', () => {
     expect(merged.installationId == null).toBe(true);
   });
 
-  it('uses daemon silent update preference and clears stale local values when absent', () => {
+  it('uses daemon automatic update preference and defaults absent legacy values off', () => {
+    expect(DEFAULT_CONFIG.allowSilentUpdates).toBe(false);
     expect(
       mergeDaemonConfig(DEFAULT_CONFIG, { allowSilentUpdates: false }).allowSilentUpdates,
     ).toBe(false);
@@ -424,7 +425,7 @@ describe('mergeDaemonConfig', () => {
     ).toBe(true);
     expect(
       mergeDaemonConfig({ ...DEFAULT_CONFIG, allowSilentUpdates: true }, {}).allowSilentUpdates,
-    ).toBeUndefined();
+    ).toBe(false);
   });
 });
 

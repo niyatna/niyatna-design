@@ -281,7 +281,7 @@ async function writeAssembledAppEntrypoints(
         main: "./main.cjs",
         name: "open-design-packaged-app",
         private: true,
-        productName: PRODUCT_NAME,
+        productName: config.productName ?? PRODUCT_NAME,
         version: packageVersion,
       },
       null,

@@ -129,7 +129,7 @@ describe('UpdaterPopup', () => {
     expect(dialog).toBeTruthy();
     expect(dialog.className).toBe('updater-popup is-ready');
     expect(screen.getByText('Open Design 1.2.3-beta.4 is ready. Open Design will close and open the installer.')).toBeTruthy();
-    expect(screen.getByTestId('updater-silent-update-checkbox')).toBeChecked();
+    expect(screen.getByTestId('updater-silent-update-checkbox')).not.toBeChecked();
     expect(screen.getByTestId('updater-install-button').textContent).toBe('Install update');
     expect(screen.queryByRole('button', { name: 'Collapse' })).toBeNull();
   });
@@ -229,7 +229,7 @@ describe('UpdaterPopup', () => {
     expect(screen.getByText('Open Design 1.2.3-beta.4 已就绪。Open Design 会关闭并自动重启。')).toBeTruthy();
   });
 
-  it('seeds the default silent-update preference only after a successful daemon GET', async () => {
+  it('keeps automatic updates disabled when the daemon preference is absent', async () => {
     const persistSilentUpdates = vi.fn(async () => undefined);
     restoreHost = installMockOpenDesignHost({
       host: {
@@ -244,8 +244,7 @@ describe('UpdaterPopup', () => {
     );
 
     fireEvent.click(await screen.findByTestId('entry-nav-updater'));
-    expect((screen.getByTestId('updater-silent-update-checkbox') as HTMLInputElement).checked).toBe(true);
-    // Before a successful GET, undefined must not be treated as "no preference".
+  expect((screen.getByTestId('updater-silent-update-checkbox') as HTMLInputElement).checked).toBe(false);
     expect(persistSilentUpdates).not.toHaveBeenCalled();
 
     view.rerender(
@@ -254,7 +253,11 @@ describe('UpdaterPopup', () => {
         onAllowSilentUpdatesChange={persistSilentUpdates}
       />,
     );
-    await waitFor(() => expect(persistSilentUpdates).toHaveBeenCalledWith(true));
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect((screen.getByTestId('updater-silent-update-checkbox') as HTMLInputElement).checked).toBe(false);
+    expect(persistSilentUpdates).not.toHaveBeenCalled();
   });
 
   it('does not seed when daemon GET failed (ready=false) even if bootstrap finished', async () => {
@@ -312,53 +315,6 @@ describe('UpdaterPopup', () => {
       expect((screen.getByTestId('updater-silent-update-checkbox') as HTMLInputElement).checked).toBe(false);
     });
     expect(persistSilentUpdates).not.toHaveBeenCalled();
-  });
-
-  it('re-enables the checkbox after seed when the parent re-renders with the saved true', async () => {
-    let resolveSave: (() => void) | null = null;
-    const persistSilentUpdates = vi.fn(
-      () => new Promise<void>((resolve) => {
-        resolveSave = resolve;
-      }),
-    );
-    restoreHost = installMockOpenDesignHost({
-      host: {
-        updater: {
-          status: vi.fn(async () => downloadedStatus()),
-        },
-      },
-    });
-
-    const view = render(
-      <UpdaterPopup
-        silentUpdatePreferenceReady
-        onAllowSilentUpdatesChange={persistSilentUpdates}
-      />,
-    );
-
-    fireEvent.click(await screen.findByTestId('entry-nav-updater'));
-    await waitFor(() => expect(persistSilentUpdates).toHaveBeenCalledWith(true));
-    const checkbox = screen.getByTestId('updater-silent-update-checkbox') as HTMLInputElement;
-    expect(checkbox.disabled).toBe(true);
-
-    // Real parent shape: config updates mid-flight when the write is accepted.
-    view.rerender(
-      <UpdaterPopup
-        allowSilentUpdates={true}
-        silentUpdatePreferenceReady
-        onAllowSilentUpdatesChange={persistSilentUpdates}
-      />,
-    );
-
-    await act(async () => {
-      resolveSave?.();
-      await Promise.resolve();
-    });
-
-    await waitFor(() => {
-      expect((screen.getByTestId('updater-silent-update-checkbox') as HTMLInputElement).disabled).toBe(false);
-    });
-    expect(screen.queryByTestId('updater-silent-update-error')).toBeNull();
   });
 
   it('persists silent-update toggles immediately and reverts when the non-optimistic save fails', async () => {

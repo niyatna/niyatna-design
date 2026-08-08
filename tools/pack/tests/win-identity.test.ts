@@ -15,6 +15,19 @@ import { resolveWinInstallIdentity } from "../src/win/identity.js";
 const execFileAsync = promisify(execFile);
 
 describe("resolveWinInstallIdentity", () => {
+  it("uses an explicit fork product name across user-visible Windows identity", () => {
+    expect(resolveWinInstallIdentity({
+      appVersion: "0.18.1",
+      namespace: "open-open-design",
+      productName: "Open Open Design",
+    })).toMatchObject({
+      appPathsKey: "Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\Open Open Design.exe",
+      displayName: "Open Open Design",
+      shortcutName: "Open Open Design.lnk",
+      uninstallerName: "Uninstall Open Open Design.exe",
+    });
+  });
+
   it("keeps the default namespace on the canonical Windows display name", () => {
     expect(resolveWinInstallIdentity({ namespace: "default" })).toMatchObject({
       displayName: "Open Design",

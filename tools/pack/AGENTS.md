@@ -41,6 +41,7 @@ Read this section before changing packaged auto-update behavior. The updater cro
 ### Architecture map
 
 - `apps/desktop/src/main/updater.ts` owns updater state, release metadata parsing, artifact selection, checksum verification, download-store ownership, progress events, and opening the downloaded installer. It is pure main-process logic and is tested under `apps/desktop/tests/main/updater.test.ts`.
+- `apps/desktop/src/main/updater/scheduler.ts` owns background checks. Automatic downloads and startup payload application are opt-in through daemon-owned `allowSilentUpdates === true`; absent, false, or unreadable preferences fail closed. Scheduled checks suppress `OD_UPDATE_AUTO_OPEN` so an environment override cannot bypass the saved preference.
 - `apps/desktop/src/main/runtime.ts` exposes updater IPC to the renderer through `od:update:status|check|download|install|quit` and emits `od:update:status-changed`. Keep installer launch separate from process shutdown; quit is an explicit post-installer action.
 - `apps/desktop/src/main/index.ts` wires the scheduler and the packaged macOS app-menu update item. The native item mirrors updater state and opens the renderer-owned update dialog; it must not create a second updater or a native result dialog. Windows and Linux menus do not expose update actions.
 - `apps/web/src/lib/updater.ts` normalizes host updater snapshots into UI-ready state.
@@ -95,6 +96,12 @@ OD_UPDATE_OPEN_DRY_RUN=1
 OD_UPDATE_AUTO_CHECK=1
 ```
 
+Automatic updates are disabled by default. Use the production app-config API or
+Settings → About to persist `allowSilentUpdates: true` before expecting a
+scheduled download or startup payload apply. Tests for manual download/install
+can leave the preference off and issue the corresponding updater action through
+`tools-pack inspect --update-action download|install`.
+
 This harness is appropriate for asserting IPC, popup rendering, progress, checksum/download-store behavior, and dry-run installer opening. It is not a full user-view validation because it replaces the public release feed and uses synthetic artifact bytes.
 
 ### High-confidence local user-flow acceptance
@@ -129,7 +136,9 @@ C:\odtp-beta-release-fixed\out\win\namespaces\release-beta-win\builder\Open Desi
 
 - User installs `0.8.0-beta.5` through the NSIS UI.
 - User launches `Open Design Beta`.
-- App auto-checks the real beta feed and selects the latest Windows launcher payload when the package-launcher context is valid. The installer is the fallback path when the payload artifact or launcher context is unavailable.
+- App auto-checks the real beta feed but does not download, open, or apply an update while automatic updates are off. The available update remains a manual action.
+- For automatic-update acceptance, explicitly enable Settings → About → automatic in-app updates before expecting a scheduled download or startup apply. For default-off acceptance, stage the payload with a manual download action, cold-start, and verify the running version and launcher pointers do not change.
+- Once explicitly enabled, the updater selects the latest Windows launcher payload when the package-launcher context is valid. The installer is the fallback path when the payload artifact or launcher context is unavailable.
 - For the payload path, the app downloads `platforms.win.artifacts.payload`, verifies sha256, prepares the payload under `%APPDATA%\Open Design\launcher\channels\beta\namespaces\release-beta-win\versions\<version>\payload`, and shows the web updater popup.
 - The native Windows File menu must not expose update actions. On macOS, the app menu exposes the state-aware update item and opens the renderer update dialog without making background checks intrusive.
 - The updater popup uses i18n strings and download progress must not flash to 100% before real bytes arrive.

@@ -7,12 +7,23 @@ import { promisify } from "node:util";
 import { NtExecutable, NtExecutableResource, Resource } from "resedit";
 import { describe, expect, it } from "vitest";
 
-import { materializeCachedUnpackedForInstaller } from "../src/win/builder.js";
+import {
+  createWinElectronBuilderIdentityCacheKey,
+  materializeCachedUnpackedForInstaller,
+} from "../src/win/builder.js";
 import { createLauncherRuntimeSyncPowerShellScript } from "../src/win/custom-installer.js";
 import type { WinPaths } from "../src/win/types.js";
 import { readWinExecutableVersionSnapshot } from "../src/win/version-resource.js";
 
 const execFileAsync = promisify(execFile);
+
+describe("Windows Electron builder identity cache key", () => {
+  it("changes when the packaged product name changes", () => {
+    const defaultKey = createWinElectronBuilderIdentityCacheKey({});
+    expect(createWinElectronBuilderIdentityCacheKey({ productName: undefined })).toBe(defaultKey);
+    expect(createWinElectronBuilderIdentityCacheKey({ productName: "Open Open Design" })).not.toBe(defaultKey);
+  });
+});
 
 function createPaths(root: string): WinPaths {
   const namespaceRoot = join(root, "namespaces", "second");

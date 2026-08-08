@@ -419,6 +419,32 @@ describe("desktop updater", () => {
     }
   });
 
+  it("suppresses auto-open for preference-gated scheduled downloads", async () => {
+    const root = makeRoot();
+    const fixture = await createUpdaterFixture();
+    try {
+      const updater = createDesktopUpdater({
+        arch: "arm64",
+        downloadRoot: root,
+        env: {
+          ...updaterEnv(fixture.metadataUrl),
+          [DESKTOP_UPDATE_ENV.AUTO_OPEN]: "1",
+        },
+        source: SIDECAR_SOURCES.TOOLS_PACK,
+      });
+
+      const checked = await updater.checkForUpdates({ autoDownload: true, autoOpen: false });
+
+      expect(checked.state).toBe(DESKTOP_UPDATE_STATES.DOWNLOADED);
+      expect(checked.downloadPath).toEqual(expect.any(String));
+      expect(checked.installResult).toBeUndefined();
+      expect(await readFile(checked.downloadPath ?? "", "utf8")).toBe("open design updater fixture");
+    } finally {
+      await fixture.close();
+      rmSync(root, { force: true, recursive: true });
+    }
+  });
+
   it("downloads, verifies, persists, and dry-runs opening a Windows installer", async () => {
     const root = makeRoot();
     const fixture = await createUpdaterFixture({ platform: "win" });

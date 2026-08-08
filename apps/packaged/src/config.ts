@@ -43,6 +43,7 @@ export type RawPackagedConfig = {
   // either this is absent or the user has declined Privacy → metrics.
   posthogKey?: string;
   posthogHost?: string;
+  productName?: string;
   // Origin of the vela web console this build's AMR backend serves, baked by
   // tools/pack from OD_VELA_WEB_URL at packaging time. Forwarded to the daemon
   // spawn env as OD_VELA_WEB_URL, where it both gates the workspace-team
@@ -68,6 +69,7 @@ export type PackagedConfig = {
   updateMetadataUrl: string | null;
   posthogKey: string | null;
   posthogHost: string | null;
+  productName: string | null;
   velaWebUrl: string | null;
   webSidecarEntry: string | null;
   webStandaloneRoot: string | null;
@@ -215,6 +217,7 @@ export async function readPackagedConfig(): Promise<PackagedConfig> {
     updateMetadataUrl: cleanOptionalString(raw.updateMetadataUrl),
     posthogKey: cleanOptionalString(raw.posthogKey),
     posthogHost: cleanOptionalString(raw.posthogHost),
+    productName: cleanOptionalString(raw.productName),
     velaWebUrl: cleanOptionalString(raw.velaWebUrl),
     webSidecarEntry,
     webStandaloneRoot,

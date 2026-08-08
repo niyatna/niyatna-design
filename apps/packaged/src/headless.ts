@@ -63,6 +63,7 @@ function resolveHeadlessConfig(): PackagedConfig {
     updateMetadataUrl: process.env.OD_UPDATE_METADATA_URL?.trim() || null,
     posthogKey: process.env.POSTHOG_KEY?.trim() || null,
     posthogHost: process.env.POSTHOG_HOST?.trim() || null,
+    productName: null,
     velaWebUrl: process.env.OD_VELA_WEB_URL?.trim() || null,
     webSidecarEntry: null,
     webStandaloneRoot: null,

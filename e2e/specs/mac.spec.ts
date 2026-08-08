@@ -790,13 +790,26 @@ macDescribe('packaged mac runtime smoke', () => {
       const start = await runToolsPackJson<MacStartResult>('start');
       cleanupStarted = true;
       expect(start.source).toBe('installed');
-      await waitForUpdaterStatus(
-        (status) =>
-          status.update?.state === 'downloaded' &&
-          status.update.availableVersion === targetVersion &&
-          status.update.artifact?.type === 'payload',
-        'payload downloaded before silent restart',
-      );
+      const downloaded = await runToolsPackJson<MacInspectResult>('inspect', ['--update-action', 'download']);
+      expect(downloaded.update?.state).toBe('downloaded');
+      expect(downloaded.update?.availableVersion).toBe(targetVersion);
+      expect(downloaded.update?.artifact?.type).toBe('payload');
+
+      const disabledStop = await runToolsPackJson<MacStopResult>('stop');
+      cleanupStarted = false;
+      expect(disabledStop.status).not.toBe('partial');
+
+      // Default-off acceptance: a staged payload must remain inert across a
+      // cold start until the user explicitly enables automatic updates.
+      const disabledStart = await runToolsPackJson<MacStartResult>('start');
+      cleanupStarted = true;
+      expect(disabledStart.source).toBe('installed');
+      const disabled = await waitForHealthyDesktopVersion(updateScenario.expectedCurrentVersion, start.pid);
+      expect(disabled.launcher.active?.version).toBe(updateScenario.expectedCurrentVersion);
+      expect(disabled.launcher.lastSuccessful?.version).toBe(updateScenario.expectedCurrentVersion);
+      const disabledUpdate = await runToolsPackJson<MacInspectResult>('inspect', ['--update-action', 'status']);
+      expect(disabledUpdate.update?.state).toBe('downloaded');
+      expect(disabledUpdate.update?.currentVersion).toBe(updateScenario.expectedCurrentVersion);
 
       // Enable the daemon-owned preference through the production HTTP path
       // (the same GET + merged PUT the web settings surface performs).
@@ -823,7 +836,7 @@ macDescribe('packaged mac runtime smoke', () => {
       const coldStart = await runToolsPackJson<MacStartResult>('start');
       cleanupStarted = true;
       expect(coldStart.source).toBe('installed');
-      const silent = await waitForHealthyDesktopVersion(targetVersion, start.pid);
+      const silent = await waitForHealthyDesktopVersion(targetVersion, disabledStart.pid);
       const silentHealth = assertHealthEvalValue(silent.eval?.value);
       expect(silentHealth.health.version).toBe(targetVersion);
       const silentGeneration = settledLauncherGeneration(silent.launcher, targetVersion);

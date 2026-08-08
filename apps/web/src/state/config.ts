@@ -103,6 +103,7 @@ export const DEFAULT_CONFIG: AppConfig = {
   orbit: DEFAULT_ORBIT,
   projectLocations: [],
   defaultProjectLocationId: 'default',
+  allowSilentUpdates: false,
   // Telemetry defaults to ON so fresh-install users emit onboarding /
   // ui_click events from the first frame. The disclosure modal still
   // appears after `onboardingCompleted` flips, and Settings → Privacy
@@ -1143,11 +1144,7 @@ export function mergeDaemonConfig(
       artifactManifest: next.telemetry?.artifactManifest ?? false,
     };
   }
-  if (daemonConfig.allowSilentUpdates !== undefined) {
-    next.allowSilentUpdates = daemonConfig.allowSilentUpdates;
-  } else {
-    delete next.allowSilentUpdates;
-  }
+  next.allowSilentUpdates = daemonConfig.allowSilentUpdates === true;
   if (daemonConfig.customInstructions !== undefined) {
     next.customInstructions = daemonConfig.customInstructions ?? undefined;
   }

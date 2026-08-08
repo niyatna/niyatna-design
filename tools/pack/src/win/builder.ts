@@ -70,7 +70,16 @@ import type {
 
 const execFileAsync = promisify(execFile);
 const WIN_ARCHIVE_CACHE_VERSION = 3;
-const WIN_ELECTRON_BUILDER_DIR_CACHE_VERSION = 8;
+const WIN_ELECTRON_BUILDER_DIR_CACHE_VERSION = 9;
+
+export function createWinElectronBuilderIdentityCacheKey(
+  config: Pick<ToolPackConfig, "productName">,
+): string {
+  return hashJson({
+    cacheVersion: WIN_ELECTRON_BUILDER_DIR_CACHE_VERSION,
+    productName: config.productName ?? PRODUCT_NAME,
+  });
+}
 const WIN_NSIS_BASE_PAYLOAD_INPUT_HASH_CACHE_VERSION = 2;
 
 async function hashWinNsisInstallerImplementation(config: ToolPackConfig): Promise<string> {
@@ -161,6 +170,7 @@ async function runElectronBuilderRaw(
   };
 
   const namespaceToken = sanitizeNamespace(config.namespace);
+  const productName = config.productName ?? PRODUCT_NAME;
   const packagedVersion = await runSegment("electron-builder-raw:read-packaged-version", async () =>
     readPackagedVersion(config)
   );
@@ -188,7 +198,7 @@ async function runElectronBuilderRaw(
     extraMetadata: {
       main: "./main.cjs",
       name: "open-design-packaged-app",
-      productName: PRODUCT_NAME,
+      productName,
       version: packageVersion,
     },
     extraResources: [
@@ -220,7 +230,7 @@ async function runElectronBuilderRaw(
       shortcutName: PRODUCT_NAME,
       warningsAsErrors: false,
     },
-    productName: PRODUCT_NAME,
+    productName,
     publish: [{ provider: "generic", url: "https://updates.invalid/open-design" }],
     win: {
       artifactName: `${PRODUCT_NAME}-${namespaceToken}.\${ext}`,
@@ -550,6 +560,7 @@ export async function runElectronBuilder(
     portable: config.portable,
     platform: "win32",
     packagedVersionScope: versionCore,
+    identityKey: createWinElectronBuilderIdentityCacheKey(config),
     resourceTreeKey: resourceTree.key,
     target: "dir",
     webOutputMode: config.webOutputMode,

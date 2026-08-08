@@ -24,6 +24,7 @@ function createPackagedConfig(
   return {
     ...(config.amrProfile == null ? {} : { amrProfile: config.amrProfile }),
     appVersion: packagedVersion,
+    ...(config.productName == null ? {} : { productName: config.productName }),
     ...entrypoints,
     namespace: config.namespace,
     ...(config.telemetryRelayUrl == null ? {} : { telemetryRelayUrl: config.telemetryRelayUrl }),

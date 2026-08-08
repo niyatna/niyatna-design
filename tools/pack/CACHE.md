@@ -110,6 +110,11 @@ Current materialization-time parameters:
   `posthogKey`/`posthogHost`, `webOutputMode`, and `namespaceBaseRoot` — is
   regenerated on the materialization path by `writePackagedConfig`.
 
+The optional fork `productName` is not a materialization-time parameter. It
+changes Electron product metadata and is therefore covered by the
+`win.electron-builder-dir` identity key. The witness is the focused product
+name case in `tests/win-builder.test.ts`.
+
 The downstream `win.nsis-payload-overlay`, `win.nsis-installer`,
 `win.portable-zip`, and `win.launcher-payload` nodes carry `namespace` and the
 full `packagedVersion` in their keys, because their content includes the

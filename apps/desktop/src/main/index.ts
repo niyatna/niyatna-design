@@ -1025,7 +1025,7 @@ export async function runDesktopMain(
     backoffMaxMs: updater.config.checkBackoffMaxMs,
     initialDelayMs: updater.config.checkInitialDelayMs,
     intervalMs: updater.config.checkIntervalMs,
-    startupSilentPayloadUpdate: {
+    automaticUpdates: {
       isEnabled: async () => {
         const baseUrl = await discoverUpdaterAppConfigBaseUrl();
         const config = await readAppConfigFromDaemon(baseUrl);

@@ -1070,6 +1070,22 @@ winDescribe('packaged windows runtime smoke', () => {
       expect(start.source).toBe('installed');
       await waitForDownloadedUpdater(targetVersion, 'payload');
 
+      const disabledStop = await runToolsPackJson<WinStopResult>('stop');
+      cleanupStarted = false;
+      expect(disabledStop.status).not.toBe('partial');
+
+      // Default-off acceptance: a staged payload must remain inert across a
+      // cold start until the user explicitly enables automatic updates.
+      const disabledStart = await runToolsPackJson<WinStartResult>('start');
+      cleanupStarted = true;
+      expect(disabledStart.source).toBe('installed');
+      const disabled = await waitForHealthyDesktopVersion(updateScenario.expectedCurrentVersion, start.pid);
+      expect(disabled.launcher.active?.version).toBe(updateScenario.expectedCurrentVersion);
+      expect(disabled.launcher.lastSuccessful?.version).toBe(updateScenario.expectedCurrentVersion);
+      const disabledUpdate = await runToolsPackJson<WinInspectResult>('inspect', ['--update-action', 'status']);
+      expect(disabledUpdate.update?.state).toBe('downloaded');
+      expect(disabledUpdate.update?.currentVersion).toBe(updateScenario.expectedCurrentVersion);
+
       // Enable the daemon-owned preference through the production HTTP path
       // (the same GET + merged PUT the web settings surface performs).
       const enableSilent = await runToolsPackJson<WinInspectResult>('inspect', ['--expr', `
@@ -1095,7 +1111,7 @@ winDescribe('packaged windows runtime smoke', () => {
       const coldStart = await runToolsPackJson<WinStartResult>('start');
       cleanupStarted = true;
       expect(coldStart.source).toBe('installed');
-      const silent = await waitForHealthyDesktopVersion(targetVersion, start.pid);
+      const silent = await waitForHealthyDesktopVersion(targetVersion, disabledStart.pid);
       expect(settledLauncherGeneration(silent.launcher, targetVersion)).not.toBeNull();
       expect(silent.launcher.active?.version).toBe(targetVersion);
       expect(silent.launcher.lastSuccessful?.version).toBe(targetVersion);

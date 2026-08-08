@@ -158,6 +158,7 @@ export type LoadedRelease = {
 
 type ActionOptions = {
   autoDownload?: boolean;
+  autoOpen?: boolean;
 };
 
 export type DesktopUpdater = {
@@ -846,7 +847,9 @@ export function createDesktopUpdater(
       const available = activeRelease == null
         ? setState(DESKTOP_UPDATE_STATES.AVAILABLE)
         : setState(DESKTOP_UPDATE_STATES.DOWNLOADED);
-      if (options.autoDownload ?? config.autoDownload) return await downloadUpdate();
+      if (options.autoDownload ?? config.autoDownload) {
+        return await downloadUpdate({ autoOpen: options.autoOpen });
+      }
       return available;
     } catch (checkError) {
       return setFailurePreservingActive(
@@ -855,7 +858,7 @@ export function createDesktopUpdater(
     }
   }
 
-  async function downloadUpdate(): Promise<DesktopUpdateStatusSnapshot> {
+  async function downloadUpdate(options: { autoOpen?: boolean } = {}): Promise<DesktopUpdateStatusSnapshot> {
     const unsupported = unsupportedStatus();
     if (unsupported != null) return unsupported;
     if (installFrozen || installResult != null) return snapshot();
@@ -1030,7 +1033,7 @@ export function createDesktopUpdater(
         });
       }
       const downloaded = setState(DESKTOP_UPDATE_STATES.DOWNLOADED);
-      if (config.autoOpen) return await installUpdate();
+      if (options.autoOpen ?? config.autoOpen) return await installUpdate();
       return downloaded;
     } catch (downloadError) {
       if (stagingDir != null) await rm(stagingDir, { force: true, recursive: true }).catch(() => undefined);

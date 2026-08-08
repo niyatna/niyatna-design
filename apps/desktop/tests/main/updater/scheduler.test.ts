@@ -5,6 +5,64 @@ import { DESKTOP_UPDATE_CHANNELS, DESKTOP_UPDATE_STATES } from "@open-design/sid
 import { createDesktopUpdaterScheduler } from "../../../src/main/updater/scheduler.js";
 
 describe("desktop updater scheduler", () => {
+  it("keeps scheduled checks download-only and install-free when automatic updates are disabled", async () => {
+    vi.useFakeTimers();
+    const requestQuit = vi.fn();
+    const readAutomaticUpdatePreference = vi.fn(async () => false);
+    const payloadStatus = {
+      arch: "arm64",
+      capabilities: {
+        canApplyInPlace: false,
+        canDownload: true,
+        canOpenInstaller: true,
+        requiresManualInstall: true,
+      },
+      channel: DESKTOP_UPDATE_CHANNELS.BETA,
+      currentVersion: "1.0.0",
+      enabled: true,
+      mode: "package-launcher" as const,
+      platform: "darwin",
+      state: DESKTOP_UPDATE_STATES.AVAILABLE,
+      supported: true,
+    };
+    const updater = {
+      checkForUpdates: vi.fn(async () => payloadStatus),
+      config: {},
+      downloadUpdate: vi.fn(),
+      handle: vi.fn(),
+      installUpdate: vi.fn(),
+      shouldAutoCheck: vi.fn(() => true),
+      snapshot: vi.fn(() => ({ ...payloadStatus, state: DESKTOP_UPDATE_STATES.IDLE })),
+      status: vi.fn(async () => payloadStatus),
+      subscribe: vi.fn(() => () => undefined),
+    };
+    try {
+      const scheduler = createDesktopUpdaterScheduler(updater as any, {
+        backoffInitialMs: 100,
+        backoffMaxMs: 1000,
+        initialDelayMs: 10,
+        intervalMs: 100,
+        automaticUpdates: {
+          isEnabled: readAutomaticUpdatePreference,
+          requestQuit,
+        },
+      });
+
+      scheduler.start();
+      await vi.advanceTimersByTimeAsync(10);
+
+      expect(readAutomaticUpdatePreference).toHaveBeenCalledTimes(1);
+      expect(updater.checkForUpdates).toHaveBeenCalledWith({ autoDownload: false, autoOpen: false });
+      expect(updater.downloadUpdate).not.toHaveBeenCalled();
+      expect(updater.installUpdate).not.toHaveBeenCalled();
+      expect(requestQuit).not.toHaveBeenCalled();
+      expect(scheduler.isRunning()).toBe(true);
+      scheduler.stop("test");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("silently applies a ready launcher payload during the startup poll when enabled", async () => {
     vi.useFakeTimers();
     const requestQuit = vi.fn();
@@ -59,7 +117,7 @@ describe("desktop updater scheduler", () => {
         backoffMaxMs: 1000,
         initialDelayMs: 10,
         intervalMs: 100,
-        startupSilentPayloadUpdate: {
+        automaticUpdates: {
           isEnabled: readSilentPreference,
           requestQuit,
         },
@@ -68,12 +126,78 @@ describe("desktop updater scheduler", () => {
       scheduler.start();
       await vi.advanceTimersByTimeAsync(10);
 
-      expect(readSilentPreference).toHaveBeenCalledTimes(1);
+      expect(readSilentPreference).toHaveBeenCalledTimes(2);
       expect(updater.installUpdate).toHaveBeenCalledTimes(1);
       expect(requestQuit).toHaveBeenCalledTimes(1);
       expect(scheduler.isRunning()).toBe(false);
       await vi.advanceTimersByTimeAsync(500);
       expect(updater.checkForUpdates).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("does not apply a ready payload when automatic updates are disabled during the startup check", async () => {
+    vi.useFakeTimers();
+    const requestQuit = vi.fn();
+    const readAutomaticUpdatePreference = vi.fn()
+      .mockResolvedValueOnce(true)
+      .mockResolvedValue(false);
+    const payloadStatus = {
+      arch: "arm64",
+      artifact: {
+        name: "open-design-1.0.1-mac-arm64-payload.zip",
+        platformKey: "mac",
+        size: 1024,
+        type: "payload",
+        url: "https://example.invalid/payload.zip",
+      },
+      capabilities: {
+        canApplyInPlace: true,
+        canDownload: true,
+        canOpenInstaller: false,
+        requiresManualInstall: false,
+      },
+      channel: DESKTOP_UPDATE_CHANNELS.BETA,
+      currentVersion: "1.0.0",
+      downloadPath: "/tmp/open-design-updates/payload.zip",
+      enabled: true,
+      mode: "package-launcher" as const,
+      platform: "darwin",
+      state: DESKTOP_UPDATE_STATES.DOWNLOADED,
+      supported: true,
+    };
+    const updater = {
+      checkForUpdates: vi.fn(async () => payloadStatus),
+      config: {},
+      downloadUpdate: vi.fn(),
+      handle: vi.fn(),
+      installUpdate: vi.fn(),
+      shouldAutoCheck: vi.fn(() => true),
+      snapshot: vi.fn(() => payloadStatus),
+      status: vi.fn(async () => payloadStatus),
+      subscribe: vi.fn(() => () => undefined),
+    };
+    try {
+      const scheduler = createDesktopUpdaterScheduler(updater as any, {
+        automaticUpdates: {
+          isEnabled: readAutomaticUpdatePreference,
+          requestQuit,
+        },
+        backoffInitialMs: 100,
+        backoffMaxMs: 1000,
+        initialDelayMs: 10,
+        intervalMs: 100,
+      });
+
+      scheduler.start();
+      await vi.advanceTimersByTimeAsync(10);
+
+      expect(readAutomaticUpdatePreference).toHaveBeenCalledTimes(2);
+      expect(updater.installUpdate).not.toHaveBeenCalled();
+      expect(requestQuit).not.toHaveBeenCalled();
+      expect(scheduler.isRunning()).toBe(true);
+      scheduler.stop("test");
     } finally {
       vi.useRealTimers();
     }
@@ -134,7 +258,7 @@ describe("desktop updater scheduler", () => {
         backoffMaxMs: 1000,
         initialDelayMs: 10,
         intervalMs: 100,
-        startupSilentPayloadUpdate: {
+        automaticUpdates: {
           isEnabled: readSilentPreference,
           requestQuit,
         },
@@ -144,7 +268,8 @@ describe("desktop updater scheduler", () => {
       await vi.advanceTimersByTimeAsync(10);
 
       expect(updater.status).toHaveBeenCalledTimes(1);
-      expect(readSilentPreference).not.toHaveBeenCalled();
+      expect(readSilentPreference).toHaveBeenCalledTimes(1);
+      expect(updater.checkForUpdates).toHaveBeenCalledWith({ autoDownload: true, autoOpen: false });
       expect(updater.installUpdate).not.toHaveBeenCalled();
       expect(requestQuit).not.toHaveBeenCalled();
       expect(scheduler.isRunning()).toBe(true);
@@ -211,7 +336,7 @@ describe("desktop updater scheduler", () => {
         backoffMaxMs: 1000,
         initialDelayMs: 10,
         intervalMs: 100,
-        startupSilentPayloadUpdate: {
+        automaticUpdates: {
           isEnabled: readSilentPreference,
           requestQuit,
         },
@@ -222,9 +347,74 @@ describe("desktop updater scheduler", () => {
       await vi.advanceTimersByTimeAsync(100);
 
       expect(updater.checkForUpdates).toHaveBeenCalledTimes(2);
-      expect(readSilentPreference).not.toHaveBeenCalled();
+  expect(readSilentPreference).toHaveBeenCalledTimes(2);
+  expect(updater.checkForUpdates).toHaveBeenNthCalledWith(1, { autoDownload: true, autoOpen: false });
+  expect(updater.checkForUpdates).toHaveBeenNthCalledWith(2, { autoDownload: true, autoOpen: false });
       expect(updater.installUpdate).not.toHaveBeenCalled();
       expect(requestQuit).not.toHaveBeenCalled();
+      scheduler.stop("test");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("fails closed when the automatic update preference cannot be read", async () => {
+    vi.useFakeTimers();
+    const requestQuit = vi.fn();
+    const logger = { error: vi.fn(), warn: vi.fn() };
+    const idleStatus = {
+      arch: "arm64",
+      capabilities: {
+        canApplyInPlace: false,
+        canDownload: true,
+        canOpenInstaller: true,
+        requiresManualInstall: true,
+      },
+      channel: DESKTOP_UPDATE_CHANNELS.BETA,
+      currentVersion: "1.0.0",
+      enabled: true,
+      mode: "package-launcher" as const,
+      platform: "darwin",
+      state: DESKTOP_UPDATE_STATES.IDLE,
+      supported: true,
+    };
+    const updater = {
+      checkForUpdates: vi.fn(async () => ({ ...idleStatus, state: DESKTOP_UPDATE_STATES.AVAILABLE })),
+      config: {},
+      downloadUpdate: vi.fn(),
+      handle: vi.fn(),
+      installUpdate: vi.fn(),
+      shouldAutoCheck: vi.fn(() => true),
+      snapshot: vi.fn(() => idleStatus),
+      status: vi.fn(async () => idleStatus),
+      subscribe: vi.fn(() => () => undefined),
+    };
+    try {
+      const scheduler = createDesktopUpdaterScheduler(updater as any, {
+        automaticUpdates: {
+          isEnabled: vi.fn(async () => {
+            throw new Error("daemon unavailable");
+          }),
+          requestQuit,
+        },
+        backoffInitialMs: 100,
+        backoffMaxMs: 1000,
+        initialDelayMs: 10,
+        intervalMs: 100,
+        logger,
+      });
+
+      scheduler.start();
+      await vi.advanceTimersByTimeAsync(10);
+
+      expect(updater.checkForUpdates).toHaveBeenCalledWith({ autoDownload: false, autoOpen: false });
+      expect(updater.downloadUpdate).not.toHaveBeenCalled();
+      expect(updater.installUpdate).not.toHaveBeenCalled();
+      expect(requestQuit).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        "[open-design updater] automatic update preference read failed; keeping automatic updates disabled",
+        expect.any(Error),
+      );
       scheduler.stop("test");
     } finally {
       vi.useRealTimers();

@@ -99,6 +99,7 @@ export type ToolPackConfig = {
    */
   posthogKey?: string;
   posthogHost?: string;
+  productName?: string;
   /**
    * Origin of the vela web console this build's AMR backend serves, sourced
    * from `OD_VELA_WEB_URL` at packaging time. Baked into
@@ -164,6 +165,16 @@ function resolveToolPackAppVersion(value: string | undefined): string | undefine
   const normalized = value.trim();
   if (normalized.length === 0) throw new Error("--app-version must not be empty");
   if (/\s/.test(normalized)) throw new Error(`--app-version must not contain whitespace: ${value}`);
+  return normalized;
+}
+
+function resolveToolPackProductName(value: string | undefined): string | undefined {
+  if (value == null) return undefined;
+  const normalized = value.trim();
+  if (normalized.length === 0) return undefined;
+  if (/[\x00-\x1f<>:"/\\|?*]/.test(normalized) || normalized.endsWith(".")) {
+    throw new Error(`OD_PACKAGED_PRODUCT_NAME contains unsupported characters: ${value}`);
+  }
   return normalized;
 }
 
@@ -396,6 +407,7 @@ export function resolveToolPackConfig(
     updateMetadataUrl: resolveToolPackUpdateMetadataUrl(process.env.OD_UPDATE_METADATA_URL),
     posthogKey: resolveToolPackPosthogKey(process.env.POSTHOG_KEY),
     posthogHost: resolveToolPackPosthogHost(process.env.POSTHOG_HOST),
+    productName: resolveToolPackProductName(process.env.OD_PACKAGED_PRODUCT_NAME),
     velaWebUrl: resolveToolPackVelaWebUrl(process.env.OD_VELA_WEB_URL),
     posthogCliApiKey: resolveToolPackPosthogCliApiKey(
       process.env.POSTHOG_CLI_API_KEY ?? process.env.POSTHOG_PERSONAL_API_KEY,

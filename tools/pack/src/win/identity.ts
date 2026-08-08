@@ -21,11 +21,12 @@ export type WinInstallIdentity = {
   uninstallerName: string;
 };
 
-export function resolveWinInstallIdentity(config: Pick<ToolPackConfig, "namespace" | "appVersion">): WinInstallIdentity {
+export function resolveWinInstallIdentity(config: Pick<ToolPackConfig, "namespace" | "appVersion" | "productName">): WinInstallIdentity {
   const namespaceToken = resolveWindowsReleaseNamespaceToken(config.namespace);
   const channel = releaseChannelFromVersion(config.appVersion)
     ?? releaseChannelFromNamespace(config.namespace, SIDECAR_DEFAULTS.namespace);
-  const displayName = channel == null ? `${PRODUCT_NAME} ${namespaceToken}` : releaseInstallIdentity(channel).productName;
+  const displayName = config.productName
+    ?? (channel == null ? `${PRODUCT_NAME} ${namespaceToken}` : releaseInstallIdentity(channel).productName);
 
   return {
     appPathsKey: `Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\${displayName}.exe`,

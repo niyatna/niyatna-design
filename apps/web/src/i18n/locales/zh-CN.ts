@@ -5187,6 +5187,8 @@ export const zhCN: Dict = {
   'community.title': '社区',
   'community.searchPlaceholder': '搜索',
   'community.searchAria': '搜索',
+  'community.clearSearch': '清除搜索',
+  'community.noResults': '没有与您的搜索匹配的模板。',
   'community.filtersAria': '模板筛选',
   'community.closePreview': '关闭预览',
   'community.typePrototype': '原型',

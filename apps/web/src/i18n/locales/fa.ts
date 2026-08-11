@@ -4733,6 +4733,8 @@ export const fa: Dict = {
   'community.title': 'Community',
   'community.searchPlaceholder': 'Search',
   'community.searchAria': 'Search',
+  'community.clearSearch': 'پاک کردن جستجو',
+  'community.noResults': 'هیچ قالبی با جستجوی شما مطابقت ندارد.',
   'community.filtersAria': 'Template filters',
   'community.closePreview': 'Close preview',
   'community.typePrototype': 'Prototype',

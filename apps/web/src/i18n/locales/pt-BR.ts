@@ -4738,6 +4738,8 @@ export const ptBR: Dict = {
   'community.title': 'Community',
   'community.searchPlaceholder': 'Search',
   'community.searchAria': 'Search',
+  'community.clearSearch': 'Limpar busca',
+  'community.noResults': 'Nenhum template corresponde à sua busca.',
   'community.filtersAria': 'Template filters',
   'community.closePreview': 'Close preview',
   'community.typePrototype': 'Prototype',

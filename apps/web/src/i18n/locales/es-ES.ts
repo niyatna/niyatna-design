@@ -4738,6 +4738,8 @@ export const esES: Dict = {
   'community.title': 'Community',
   'community.searchPlaceholder': 'Search',
   'community.searchAria': 'Search',
+  'community.clearSearch': 'Borrar búsqueda',
+  'community.noResults': 'Ninguna plantilla coincide con tu búsqueda.',
   'community.filtersAria': 'Template filters',
   'community.closePreview': 'Close preview',
   'community.typePrototype': 'Prototype',

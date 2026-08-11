@@ -4738,6 +4738,8 @@ export const uk: Dict = {
   'community.title': 'Community',
   'community.searchPlaceholder': 'Search',
   'community.searchAria': 'Search',
+  'community.clearSearch': 'Очистити пошук',
+  'community.noResults': 'Немає шаблонів, що відповідають вашому запиту.',
   'community.filtersAria': 'Template filters',
   'community.closePreview': 'Close preview',
   'community.typePrototype': 'Prototype',

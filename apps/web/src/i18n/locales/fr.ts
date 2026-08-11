@@ -4738,6 +4738,8 @@ export const fr: Dict = {
   'community.title': 'Community',
   'community.searchPlaceholder': 'Search',
   'community.searchAria': 'Search',
+  'community.clearSearch': 'Effacer la recherche',
+  'community.noResults': 'Aucun modèle ne correspond à votre recherche.',
   'community.filtersAria': 'Template filters',
   'community.closePreview': 'Close preview',
   'community.typePrototype': 'Prototype',

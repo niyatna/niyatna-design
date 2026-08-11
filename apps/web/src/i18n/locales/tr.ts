@@ -4738,6 +4738,8 @@ export const tr: Dict = {
   'community.title': 'Community',
   'community.searchPlaceholder': 'Search',
   'community.searchAria': 'Search',
+  'community.clearSearch': 'Aramayı temizle',
+  'community.noResults': 'Aramanızla eşleşen şablon yok.',
   'community.filtersAria': 'Template filters',
   'community.closePreview': 'Close preview',
   'community.typePrototype': 'Prototype',

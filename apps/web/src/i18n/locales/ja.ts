@@ -4738,6 +4738,8 @@ export const ja: Dict = {
   'community.title': 'Community',
   'community.searchPlaceholder': 'Search',
   'community.searchAria': 'Search',
+  'community.clearSearch': '検索をクリア',
+  'community.noResults': '検索に一致するテンプレートがありません。',
   'community.filtersAria': 'Template filters',
   'community.closePreview': 'Close preview',
   'community.typePrototype': 'Prototype',

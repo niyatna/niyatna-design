@@ -1440,6 +1440,32 @@
   color: var(--brand, #87ea5c);
 }
 
+.community-template-view__search-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-soft);
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.community-template-view__search-clear:hover {
+  background: var(--bg-soft, rgba(127, 127, 127, 0.16));
+  color: var(--text);
+}
+
+.community-template-view__empty {
+  margin: 24px 4px 0;
+  color: var(--text-soft);
+  font-size: 14px;
+}
+
 .community-template-grid {
   display: grid;
   /* Responsive fill so the now full-width view keeps consistent ~300px cards

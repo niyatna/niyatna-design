@@ -102,6 +102,11 @@ export function CommunityView({ onRemixTemplate, onUsePrompt, onUsePlugin }: Com
   const [detailsRecord, setDetailsRecord] = useState<InstalledPluginRecord | null>(null);
   const [activeType, setActiveType] = useState<TemplateType>('Slides');
   const [activeSubtype, setActiveSubtype] = useState('All');
+  // Free-text search across title / subtype / tags / prompt / meta. The field
+  // used to ship as `readOnly` with no value binding — typing was discarded and
+  // `filteredTemplates` never consulted the query, so the input was pure
+  // decoration. Wired here so type/subtype filters compose with text search.
+  const [searchQuery, setSearchQuery] = useState('');
   // Remix (and the prompt-artifact copy path it shares) hands off to a
   // fire-and-forget parent callback (`onRemixTemplate`/`onUsePrompt` return
   // void) that kicks off a real POST /api/projects — nothing here observes
@@ -158,7 +163,25 @@ export function CommunityView({ onRemixTemplate, onUsePrompt, onUsePlugin }: Com
   const filteredTemplates = templates.filter((template) => {
     const typeMatches = template.type === activeType;
     const subtypeMatches = activeSubtype === 'All' || template.subtype === activeSubtype;
-    return typeMatches && subtypeMatches;
+    if (!typeMatches || !subtypeMatches) return false;
+    const normalizedQuery = searchQuery.trim().toLocaleLowerCase(locale);
+    if (!normalizedQuery) return true;
+    // Match across the human-readable surfaces of a card. Prompt is the
+    // composer seed and is usually long-form, so we still include it — a
+    // query like "case for investing" should land in the matching Q2 review
+    // card. Matching is a single pass over the lowered haystack rather than
+    // per-field `.includes()` so we don't lowercase each field on every key
+    // press.
+    const haystack = [
+      template.title,
+      template.subtype,
+      template.meta,
+      template.prompt,
+      template.tags.join(' '),
+    ]
+      .join(' \u0001 ')
+      .toLocaleLowerCase(locale);
+    return haystack.includes(normalizedQuery);
   });
   const templateScope = (templateId: string) => {
     const sourceKind = plugins.find((row) => row.id === templateId)?.sourceKind;
@@ -247,7 +270,23 @@ export function CommunityView({ onRemixTemplate, onUsePrompt, onUsePlugin }: Com
         </div>
         <div className="community-template-view__search" role="search">
           <Icon name="search" size={16} />
-          <input type="search" placeholder={t('community.searchPlaceholder')} aria-label={t('community.searchAria')} readOnly />
+          <input
+            type="search"
+            placeholder={t('community.searchPlaceholder')}
+            aria-label={t('community.searchAria')}
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+          />
+          {searchQuery ? (
+            <button
+              type="button"
+              className="community-template-view__search-clear"
+              aria-label={t('community.clearSearch')}
+              onClick={() => setSearchQuery('')}
+            >
+              <Icon name="close" size={14} />
+            </button>
+          ) : null}
         </div>
       </header>
 
@@ -373,6 +412,11 @@ export function CommunityView({ onRemixTemplate, onUsePrompt, onUsePlugin }: Com
           </article>
         ))}
       </div>
+      {filteredTemplates.length === 0 ? (
+        <p className="community-template-view__empty" role="status">
+          {t('community.noResults')}
+        </p>
+      ) : null}
       {detailsRecord ? (
         <PluginDetailsModal
           record={detailsRecord}

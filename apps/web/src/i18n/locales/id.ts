@@ -4738,6 +4738,8 @@ export const id: Dict = {
   'community.title': 'Community',
   'community.searchPlaceholder': 'Search',
   'community.searchAria': 'Search',
+  'community.clearSearch': 'Hapus pencarian',
+  'community.noResults': 'Tidak ada template yang cocok dengan pencarian Anda.',
   'community.filtersAria': 'Template filters',
   'community.closePreview': 'Close preview',
   'community.typePrototype': 'Prototype',

@@ -4738,6 +4738,8 @@ export const ko: Dict = {
   'community.title': 'Community',
   'community.searchPlaceholder': 'Search',
   'community.searchAria': 'Search',
+  'community.clearSearch': '검색 지우기',
+  'community.noResults': '검색과 일치하는 템플릿이 없습니다.',
   'community.filtersAria': 'Template filters',
   'community.closePreview': 'Close preview',
   'community.typePrototype': 'Prototype',

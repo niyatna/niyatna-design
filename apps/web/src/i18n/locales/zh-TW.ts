@@ -5194,6 +5194,8 @@ export const zhTW: Dict = {
   'community.title': '社群',
   'community.searchPlaceholder': '搜尋',
   'community.searchAria': '搜尋',
+  'community.clearSearch': '清除搜尋',
+  'community.noResults': '沒有與您的搜尋相符的範本。',
   'community.filtersAria': '範本篩選',
   'community.closePreview': '關閉預覽',
   'community.typePrototype': '原型',

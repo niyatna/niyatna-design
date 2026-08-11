@@ -4738,6 +4738,8 @@ export const th: Dict = {
   'community.title': 'Community',
   'community.searchPlaceholder': 'Search',
   'community.searchAria': 'Search',
+  'community.clearSearch': 'ล้างการค้นหา',
+  'community.noResults': 'ไม่มีเทมเพลตที่ตรงกับการค้นหาของคุณ',
   'community.filtersAria': 'Template filters',
   'community.closePreview': 'Close preview',
   'community.typePrototype': 'Prototype',

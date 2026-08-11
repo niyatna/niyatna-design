@@ -4738,6 +4738,8 @@ export const hu: Dict = {
   'community.title': 'Community',
   'community.searchPlaceholder': 'Search',
   'community.searchAria': 'Search',
+  'community.clearSearch': 'Keresés törlése',
+  'community.noResults': 'Nincs a keresésnek megfelelő sablon.',
   'community.filtersAria': 'Template filters',
   'community.closePreview': 'Close preview',
   'community.typePrototype': 'Prototype',

@@ -4909,6 +4909,8 @@ export interface Dict {
   'community.title': string;
   'community.searchPlaceholder': string;
   'community.searchAria': string;
+  'community.clearSearch': string;
+  'community.noResults': string;
   'community.filtersAria': string;
   'community.closePreview': string;
   'community.typePrototype': string;

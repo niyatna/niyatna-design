@@ -4738,6 +4738,8 @@ export const ru: Dict = {
   'community.title': 'Community',
   'community.searchPlaceholder': 'Search',
   'community.searchAria': 'Search',
+  'community.clearSearch': 'Очистить поиск',
+  'community.noResults': 'Нет шаблонов, соответствующих вашему запросу.',
   'community.filtersAria': 'Template filters',
   'community.closePreview': 'Close preview',
   'community.typePrototype': 'Prototype',

@@ -1754,6 +1754,33 @@ export function EntryNavRail({
               <Icon name="palette" size={16} />
             </NavButton>
             <NavButton
+              active={view === 'library'}
+              ariaLabel="Library"
+              label="Library"
+              onClick={() => selectView('library')}
+              testId="entry-nav-library"
+            >
+              <Icon name="image" size={16} />
+            </NavButton>
+            <NavButton
+              active={view === 'brands'}
+              ariaLabel={t('entry.navBrands') || 'Brands'}
+              label={t('entry.navBrands') || 'Brands'}
+              onClick={() => selectView('brands')}
+              testId="entry-nav-brands"
+            >
+              <Icon name="blocks" size={16} />
+            </NavButton>
+            <NavButton
+              active={view === 'tasks'}
+              ariaLabel={t('entry.navTasks') || 'Tasks'}
+              label={t('entry.navTasks') || 'Tasks'}
+              onClick={() => selectView('tasks')}
+              testId="entry-nav-tasks"
+            >
+              <Icon name="kanban" size={16} />
+            </NavButton>
+            <NavButton
               active={view === 'plugins'}
               ariaLabel={t('entry.navPlugins')}
               label={t('entry.navPlugins')}

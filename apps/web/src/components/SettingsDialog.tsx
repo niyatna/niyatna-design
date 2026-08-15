@@ -4383,6 +4383,50 @@ export function SettingsDialog({
             </button>
             <button
               type="button"
+              className={`settings-nav-item${activeSection === 'mcpClient' ? ' active' : ''}`}
+              onClick={() => setActiveSection('mcpClient')}
+            >
+              <Icon name="link" size={18} />
+              <span>
+                <strong>MCP Client</strong>
+                <small>External MCP servers</small>
+              </span>
+            </button>
+            <button
+              type="button"
+              className={`settings-nav-item${activeSection === 'composio' ? ' active' : ''}`}
+              onClick={() => setActiveSection('composio')}
+            >
+              <Icon name="puzzle" size={18} />
+              <span>
+                <strong>Connectors</strong>
+                <small>GitHub, Figma, Notion, Slack</small>
+              </span>
+            </button>
+            <button
+              type="button"
+              className={`settings-nav-item${activeSection === 'routines' ? ' active' : ''}`}
+              onClick={() => setActiveSection('routines')}
+            >
+              <Icon name="sparkles" size={18} />
+              <span>
+                <strong>Routines</strong>
+                <small>Scheduled AI routines</small>
+              </span>
+            </button>
+            <button
+              type="button"
+              className={`settings-nav-item${activeSection === 'orbit' ? ' active' : ''}`}
+              onClick={() => setActiveSection('orbit')}
+            >
+              <Icon name="orbit" size={18} />
+              <span>
+                <strong>Orbit</strong>
+                <small>Automation scheduler</small>
+              </span>
+            </button>
+            <button
+              type="button"
               className={`settings-nav-item${activeSection === 'privacy' ? ' active' : ''}`}
               onClick={() => setActiveSection('privacy')}
             >

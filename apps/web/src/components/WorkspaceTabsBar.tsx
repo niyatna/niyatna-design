@@ -1855,14 +1855,18 @@ export function WorkspaceTabsBar({
             </div>
           );
         })}
-        {/* #5517 drops the top-right "+"; new tab stays reachable through
-            ⌘/Ctrl+T. That "+" was the ONLY caller of openRadialMenu, so the
-            radial template menu below is now unreachable — its state and
-            markup stay, as the reference keeps them.
-
-            The tab-search button (and its popover) was removed per request
-            (2026-07-24); a tab scrolled out of view is reached by scrolling
-            the strip or cycling with Ctrl+Tab / ⌘1-9. */}
+        <button
+          type="button"
+          className="workspace-tabs-new-btn od-tooltip"
+          aria-label={t('workspaceTabs.newTab') || 'New tab'}
+          title={t('workspaceTabs.newTab') || 'New tab'}
+          data-tooltip={t('workspaceTabs.newTab') || 'New tab'}
+          data-tooltip-placement="bottom"
+          data-testid="workspace-tabs-add"
+          onClick={openRadialMenu}
+        >
+          <Icon name="plus" size={16} />
+        </button>
       </div>
       </>,
       )}

@@ -2080,12 +2080,12 @@
   outline: none;
 }
 .inline-switcher__campaign-badge.is-restricted {
-  color: #5f645d;
-  background: #e4e7e2;
+  color: var(--text-muted);
+  background: var(--bg-subtle);
 }
 .inline-switcher__campaign-badge.is-unpaid {
-  color: #5f645d;
-  background: #eceeeb;
+  color: var(--text-muted);
+  background: var(--bg-subtle);
 }
 .inline-switcher__chip[data-campaign-highlight='true'] {
   border-color: var(--accent);
@@ -8133,7 +8133,7 @@ button.entry-nav-rail__menu-credits-row:active:not(:disabled) {
   padding: 2px 7px;
   border-radius: 999px;
   background: color-mix(in srgb, #848484 14%, transparent);
-  color: #353535;
+  color: var(--text-muted);
   font-size: 12px;
   font-weight: 600;
 }
@@ -8188,7 +8188,7 @@ button.entry-nav-rail__menu-credits-row:active:not(:disabled) {
 }
 .upgrade-team__benefits svg {
   flex: 0 0 auto;
-  color: #353535;
+  color: var(--text-muted);
 }
 .upgrade-team__foot {
   display: flex;
@@ -8520,8 +8520,8 @@ button.entry-nav-rail__menu-credits-row:active:not(:disabled) {
   height: 72px;
   margin-left: -20px;
   border-radius: 50%;
-  border: 3px solid #fff;
-  background: #fff;
+  border: 3px solid var(--border-strong, #848484);
+  background: var(--bg-panel, #252528);
   overflow: hidden;
   display: grid;
   place-items: center;

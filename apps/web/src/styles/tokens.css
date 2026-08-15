@@ -115,8 +115,8 @@
      whole message module stays inside the 12–16px band. */
   --prose-font-size: 13px;
   --prose-line-height: 1.7;
-  --code-header-bg: #ededed;
-  --code-body-bg: #fafafa;
+  --code-header-bg: #1e1e20;
+  --code-body-bg: #18181b;
   --code-font-size: 13px;
   --code-line-height: 1.65;
 }

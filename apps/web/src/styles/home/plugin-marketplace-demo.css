@@ -268,16 +268,16 @@
 }
 
 .plugin-marketplace__icon--github {
-  background: #111;
+  background: var(--bg-panel, #252528);
   color: #fff;
 }
 
 .plugin-marketplace__icon--notion {
-  background: #fff;
-  color: #111;
+  background: var(--bg-panel, #252528);
+  color: var(--text-strong, #fafafa);
   font-family: Georgia, "Times New Roman", serif;
   font-size: 18px;
-  border-color: color-mix(in srgb, #000 13%, var(--border));
+  border-color: var(--border);
 }
 
 .plugin-marketplace__icon--figma {
@@ -286,7 +286,7 @@
   gap: 1px;
   align-content: center;
   justify-content: center;
-  background: #fff;
+  background: var(--bg-panel, #252528);
 }
 
 .plugin-marketplace__icon--figma i {
@@ -305,7 +305,7 @@
 .plugin-marketplace__icon--drive {
   position: relative;
   overflow: hidden;
-  background: #fff;
+  background: var(--bg-panel, #252528);
 }
 
 .plugin-marketplace__icon--drive i {
@@ -336,7 +336,7 @@
   grid-template-columns: repeat(2, 9px);
   grid-template-rows: repeat(2, 9px);
   gap: 3px;
-  background: #fff;
+  background: var(--bg-panel, #252528);
 }
 
 .plugin-marketplace__icon--slack i {

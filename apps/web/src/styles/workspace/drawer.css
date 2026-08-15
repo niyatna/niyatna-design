@@ -2628,14 +2628,15 @@
 }
 .ws-tab-action:hover:not(:disabled) { background: var(--bg-subtle); color: var(--text); border-color: transparent; }
 .ws-tab-action.share {
-  background: var(--text);
-  color: var(--bg);
-  border-color: var(--text);
+  background: var(--text-strong, #fafafa);
+  color: var(--bg, #202020);
+  border-color: var(--text-strong, #fafafa);
   font-weight: 500;
 }
 .ws-tab-action.share:hover:not(:disabled) {
-  background: #000;
-  border-color: #000;
+  background: #ffffff;
+  border-color: #ffffff;
+  color: var(--bg, #202020);
 }
 
 .workspace-readonly-notice {

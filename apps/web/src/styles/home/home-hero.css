@@ -2040,10 +2040,10 @@
   height: 12px;
 }
 .home-hero__model-option-icon--openai {
-  color: #111827;
+  color: var(--text, #ededed);
 }
 .home-hero__model-option-icon--dalle {
-  color: #111827;
+  color: var(--text, #ededed);
 }
 .home-hero__model-option-icon--seed {
   color: #3c8cff;
@@ -2052,31 +2052,31 @@
   color: #1A74FF;
 }
 .home-hero__model-option-icon--grok {
-  color: #111827;
+  color: var(--text, #ededed);
 }
 .home-hero__model-option-icon--google {
   color: #4285f4;
 }
 .home-hero__model-option-icon--router {
-  color: #353535;
+  color: var(--text-muted, #bdbdbd);
 }
 .home-hero__model-option-icon--flux {
-  color: #0f766e;
+  color: #2dd4bf;
 }
 .home-hero__model-option-icon--elevenlabs {
-  color: #111827;
+  color: var(--text, #ededed);
 }
 .home-hero__model-option-icon--fishaudio {
-  color: #7c6ee6;
+  color: #a78bfa;
 }
 .home-hero__model-option-icon--minimax {
-  color: #e73562;
+  color: #f43f5e;
 }
 .home-hero__model-option-icon--suno {
-  color: #111827;
+  color: var(--text, #ededed);
 }
 .home-hero__model-option-icon--audio {
-  color: #c05621;
+  color: #fb923c;
 }
 .home-hero__model-option-icon--custom {
   color: var(--text-muted);
@@ -2138,7 +2138,7 @@
   color: #0f766e;
 }
 .home-hero__ratio-option-icon--portrait {
-  color: #353535;
+  color: var(--text-muted, #bdbdbd);
 }
 .home-hero__ratio-option-icon--custom {
   color: var(--text-muted);
@@ -2463,7 +2463,7 @@
   border-radius: 12px;
   /* Favicons are drawn for a light browser tab, so keep the tile light in both
      themes; the border keeps it defined on a light page. */
-  background: #fff;
+  background: var(--bg-panel, #252528);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-xs);
   overflow: hidden;
@@ -2477,7 +2477,7 @@
 .home-hero__site-monogram {
   font-size: 20px;
   font-weight: 700;
-  color: #111;
+  color: var(--text-strong, #fafafa);
   line-height: 1;
 }
 .home-hero__site-domain {
@@ -3124,32 +3124,28 @@
    (极浅品牌背景 #f9fff4 under deep brand green #2f781d). */
 .home-hero__footer-option--select[data-field-name='template'].has-selection {
   max-width: 250px;
-  border-color: transparent;
-  background-color: #f9fff4;
+  border-color: var(--border);
+  background-color: var(--bg-panel, #252528);
   background-image: none;
-  color: #2f781d;
-  /* Same selected stroke as the composer-mode (设计) pill: an inset 1px ring
-     at 22% of the deep brand green. */
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, #2f781d 22%, transparent);
+  color: var(--text-strong, #fafafa);
+  box-shadow: inset 0 0 0 1px var(--border);
 }
 .home-hero__footer-option--select[data-field-name='template']:hover,
 .home-hero__footer-option--select[data-field-name='template'].is-open,
 .home-hero__footer-option--select[data-field-name='template']:focus-within {
-  border-color: var(--border);
+  border-color: var(--border-strong);
   background-color: transparent;
   background-image: none;
-  color: var(--text-muted);
+  color: var(--text);
   box-shadow: var(--shadow-xs);
 }
 .home-hero__footer-option--select[data-field-name='template'].has-selection:hover,
 .home-hero__footer-option--select[data-field-name='template'].has-selection.is-open,
 .home-hero__footer-option--select[data-field-name='template'].has-selection:focus-within {
-  border-color: transparent;
-  background-color: #f9fff4;
-  color: #2f781d;
-  /* Keep the selected ring through hover/open/focus — the generic template
-     hover rule above would otherwise swap it back to shadow-xs. */
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, #2f781d 22%, transparent);
+  border-color: var(--border-strong);
+  background-color: color-mix(in srgb, var(--text) 8%, var(--bg-panel));
+  color: var(--text-strong, #fafafa);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
 }
 .home-hero__footer-option.home-hero__template-option:hover,
 .home-hero__footer-option.home-hero__template-option.is-open,
@@ -3387,15 +3383,15 @@
    #2f781d, inset 1px ring at 22%), so the picked type reads as the same
    object in both places. */
 .home-hero__type-pill.is-active {
-  background: #f9fff4;
-  border-color: transparent;
-  color: #2f781d;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, #2f781d 22%, transparent);
+  background: var(--bg-panel, #252528);
+  border-color: var(--border-strong, rgba(255, 255, 255, 0.18));
+  color: var(--text-strong, #fafafa);
+  box-shadow: inset 0 0 0 1px var(--border);
 }
 .home-hero__type-pill.is-active:hover:not(:disabled) {
-  background: #f9fff4;
-  border-color: transparent;
-  color: #2f781d;
+  background: color-mix(in srgb, var(--text) 8%, var(--bg-panel));
+  border-color: var(--border-strong);
+  color: var(--text-strong, #fafafa);
   transform: none;
 }
 .home-hero__type-pill:disabled {

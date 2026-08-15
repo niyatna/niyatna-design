@@ -1762,15 +1762,7 @@ export function EntryNavRail({
             >
               <Icon name="image" size={16} />
             </NavButton>
-            <NavButton
-              active={view === 'brands'}
-              ariaLabel={t('entry.navBrands') || 'Brands'}
-              label={t('entry.navBrands') || 'Brands'}
-              onClick={() => selectView('brands')}
-              testId="entry-nav-brands"
-            >
-              <Icon name="blocks" size={16} />
-            </NavButton>
+
             <NavButton
               active={view === 'tasks'}
               ariaLabel={t('entry.navTasks') || 'Tasks'}

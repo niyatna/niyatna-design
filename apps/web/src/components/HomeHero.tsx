@@ -3506,7 +3506,7 @@ function SubTypeRow({
       role="tab"
       aria-selected={allActive}
     >
-      <span className="home-hero__subtype-chip-label">{t('common.all')}</span>
+      <span className="home-hero__subtype-chip-label">{t('common.all') || 'Semua'}</span>
     </button>
   );
 
@@ -3576,7 +3576,7 @@ function SubTypeRow({
           widths so the visible row can compute how many fit. */}
       <div className="home-hero__subtype-measure" aria-hidden ref={measureRef}>
         <span className="home-hero__subtype-chip" data-measure="all">
-          <span className="home-hero__subtype-chip-label">{t('common.all')}</span>
+          <span className="home-hero__subtype-chip-label">{t('common.all') || 'Semua'}</span>
         </span>
         {subChips.map((sub) => (
           <span key={sub.slug} className="home-hero__subtype-chip" data-measure="chip">

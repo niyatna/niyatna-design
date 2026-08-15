@@ -141,12 +141,7 @@ export function amrProfileBadgeLabel(profile: string | null | undefined): string
 // model endpoint was unavailable. These are the failures worth promoting AMR
 // for. Generic process failures (AGENT_EXECUTION_FAILED) and missing binaries
 // (AGENT_UNAVAILABLE) are excluded.
-const PROMOTE_AMR_CODES = new Set<string>([
-  'AGENT_AUTH_REQUIRED',
-  'UNAUTHORIZED',
-  'RATE_LIMITED',
-  'UPSTREAM_UNAVAILABLE',
-]);
+const PROMOTE_AMR_CODES = new Set<string>([]);
 
 // Primary action offered in the gray error card.
 //   - retry:                       re-run with the current agent.
@@ -626,12 +621,11 @@ export function resolveRunFailureUi(
       titleKey: 'chat.runError.title.signInRequired',
       messageKey: 'chat.runError.signInMessage.other',
       secondaryRetry: false,
-      showSwitchCard: true,
+      showSwitchCard: false,
     };
   }
   // Non-antigravity rate limit / upstream outage: name the type and explain the
-  // recovery (wait & retry / switch service), and still promote AMR as the
-  // steadier hosted alternative. Antigravity's own RATE_LIMITED was handled
+  // recovery (wait & retry / switch service). Antigravity's own RATE_LIMITED was handled
   // above (per-model quota → switch model in terminal).
   if (code === 'RATE_LIMITED') {
     return {
@@ -639,7 +633,7 @@ export function resolveRunFailureUi(
       titleKey: 'chat.runError.title.rateLimited',
       messageKey: 'chat.runError.rateLimitedMessage',
       secondaryRetry: false,
-      showSwitchCard: true,
+      showSwitchCard: false,
     };
   }
   if (code === 'UPSTREAM_UNAVAILABLE') {
@@ -648,7 +642,7 @@ export function resolveRunFailureUi(
       titleKey: 'chat.runError.title.upstreamUnavailable',
       messageKey: 'chat.runError.upstreamUnavailableMessage',
       secondaryRetry: false,
-      showSwitchCard: true,
+      showSwitchCard: false,
     };
   }
   const promote = typeof code === 'string' && PROMOTE_AMR_CODES.has(code);
@@ -657,6 +651,6 @@ export function resolveRunFailureUi(
     titleKey: 'chat.runError.title.generic',
     messageKey: null,
     secondaryRetry: false,
-    showSwitchCard: promote,
+    showSwitchCard: false,
   };
 }

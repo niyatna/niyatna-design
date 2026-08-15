@@ -22,10 +22,7 @@
   align-items: center;
   padding: 8px 14px;
   border-bottom: 0;
-  /* Solid white bar, no hairline: nothing scrolls under this bar (the body
-     scrolls inside itself), so a glass film served no function. Dark theme
-     swaps to the panel surface below. */
-  background: #ffffff;
+  background: var(--bg-panel);
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
   font-size: 13px;

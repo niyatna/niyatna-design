@@ -543,7 +543,7 @@
      height that turns narrower cards squarish. */
   height: auto;
   aspect-ratio: 4 / 3;
-  background: #fff;
+  background: var(--bg-subtle);
   overflow: hidden;
 }
 /* PreviewSurface fills the fixed-height gallery frame instead of its

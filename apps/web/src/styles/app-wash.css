@@ -11,13 +11,12 @@
    to the exact solid token it replaced, restoring the flat look. */
 
 :root {
-  /* Pastel wash palette. Alphas run a touch hot because the veils above
-     mute them. */
-  --wash-base: #ffffff; /* pure white ground */
-  --wash-blue: rgba(168, 196, 236, 0.55); /* pale sky blue */
-  --wash-pink: rgba(240, 197, 216, 0.45); /* pale rose */
-  --wash-peach: rgba(247, 224, 196, 0.5); /* warm cream light */
-  --wash-mist: rgba(213, 229, 248, 0.38); /* cool secondary blue */
+  /* Dark wash palette. */
+  --wash-base: #202020;
+  --wash-blue: rgba(96, 126, 178, 0.14);
+  --wash-pink: rgba(168, 110, 142, 0.1);
+  --wash-peach: rgba(178, 142, 100, 0.09);
+  --wash-mist: rgba(100, 130, 172, 0.09);
   /* Percent-sized ellipses scale with the viewport — no seams on resize. */
   --app-wash:
     radial-gradient(52% 44% at 12% -4%, var(--wash-blue) 0%, transparent 68%),

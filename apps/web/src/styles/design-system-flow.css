@@ -1951,7 +1951,7 @@ a.ds-source-link-open:focus-visible {
   min-height: 68vh;
   border: 1px solid var(--border);
   border-radius: 12px;
-  background: #fff;
+  background: var(--bg-subtle);
 }
 .ds-file-preview-frame--asset {
   min-height: 320px;

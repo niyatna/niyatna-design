@@ -323,7 +323,7 @@
   width: 100%;
   height: 100%;
   border: none;
-  background: white;
+  background: var(--bg);
 }
 /* Momentary "Press Esc to exit" confirmation, centered near the top of the
    presented stage. Timed to unmount at ~3.6s from the host, so the keyframe
@@ -434,7 +434,7 @@
 .preview-actions button { padding: 4px 10px; font-size: 12px; }
 .preview-body { flex: 1; min-height: 0; position: relative; }
 .preview-body iframe {
-  width: 100%; height: 100%; border: none; background: white;
+  width: 100%; height: 100%; border: none; background: var(--bg);
 }
 .preview-empty {
   display: flex; align-items: center; justify-content: center;
@@ -2266,7 +2266,7 @@ button.qf-chip-other:disabled { cursor: default; opacity: 0.6; }
 .ds-modal-stage {
   flex: 1;
   min-height: 0;
-  background: white;
+  background: var(--bg);
   position: relative;
   display: flex;
   align-items: stretch;
@@ -2276,14 +2276,14 @@ button.qf-chip-other:disabled { cursor: default; opacity: 0.6; }
   min-width: 0;
   position: relative;
   overflow: hidden;
-  background: white;
+  background: var(--bg);
 }
 .ds-modal-stage-iframe-scaler {
   position: absolute;
   top: 0;
   left: 0;
   transform-origin: top left;
-  background: white;
+  background: var(--bg);
   /* Prevent the GPU layer from blurring the scaled iframe on Retina. */
   will-change: transform;
 }
@@ -2292,7 +2292,7 @@ button.qf-chip-other:disabled { cursor: default; opacity: 0.6; }
   height: 100%;
   border: none;
   display: block;
-  background: white;
+  background: var(--bg);
 }
 .ds-modal-stage.has-sidebar .ds-modal-stage-iframe {
   flex: 1 1 60%;

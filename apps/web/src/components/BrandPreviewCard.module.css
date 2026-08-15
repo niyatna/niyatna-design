@@ -1132,7 +1132,7 @@
   height: 520px;
   border: 0;
   display: block;
-  background: #fff;
+  background: var(--bg-subtle);
 }
 
 .dsTokens {
@@ -1243,7 +1243,7 @@
   transform: scale(0.5);
   transform-origin: top left;
   pointer-events: none;
-  background: #fff;
+  background: var(--bg-subtle);
 }
 
 .assetMeta {
@@ -1412,7 +1412,7 @@
   width: 100%;
   min-height: 0;
   border: 0;
-  background: #fff;
+  background: var(--bg-subtle);
 }
 
 .designMdModalPanel {

@@ -1346,7 +1346,7 @@
   border: none;
   width: 100%;
   height: 380px;
-  background: #ffffff;
+  background: var(--bg-subtle);
   display: block;
 }
 

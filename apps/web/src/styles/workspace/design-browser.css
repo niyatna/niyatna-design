@@ -637,7 +637,7 @@
   min-width: 0;
   min-height: 0;
   overflow: hidden;
-  background: #fff;
+  background: var(--bg);
 }
 .db-webview,
 .db-fallback,
@@ -655,7 +655,7 @@
   background: var(--bg);
 }
 .db-fallback iframe {
-  background: #fff;
+  background: var(--bg-subtle);
 }
 .db-comment-layer {
   position: absolute;

@@ -238,7 +238,7 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #fff;
+  background: var(--bg-subtle);
 }
 .htmlThumb {
   width: 400%;
@@ -247,7 +247,7 @@
   transform: scale(0.25);
   transform-origin: 0 0;
   pointer-events: none;
-  background: #fff;
+  background: var(--bg-subtle);
 }
 
 /* Text snippet: the first lines, monospace, clipped to the tile. */
@@ -363,7 +363,7 @@
   width: min(940px, 92vw);
   height: calc(88vh - 52px);
   border: 0;
-  background: #fff;
+  background: var(--bg-subtle);
 }
 
 /* Audio: a centered icon over the native player. */

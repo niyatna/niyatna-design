@@ -1203,7 +1203,7 @@
   height: 200%;
   border: none;
   display: block;
-  background: white;
+  background: var(--bg-subtle);
   transform: scale(0.5);
   transform-origin: top left;
   pointer-events: none;
@@ -2484,7 +2484,7 @@
   min-height: 0;
   width: 100%;
   border: 0;
-  background: #fff;
+  background: var(--bg-subtle);
 }
 .page-template-preview-foot {
   flex: 0 0 auto;
@@ -2558,7 +2558,7 @@
 }
 .ws-tabs-bar.is-overflowing + .ws-add-tab {
   padding-left: 4px;
-  background: #fff;
+  background: var(--bg-panel);
   box-shadow: -8px 0 10px -9px color-mix(in srgb, var(--text) 30%, transparent);
 }
 .ws-tab-add {

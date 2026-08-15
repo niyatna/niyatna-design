@@ -2,69 +2,62 @@
    Open Design — neutral product workspace
    ============================================================ */
 :root {
-  /* OpenDesign system palette. Neutrals carry the interface; brand green is
-     reserved for sparse feedback, selected assists, and brand emphasis. */
-  --bg: #fff;
-  --bg-app: #fff;
-  --bg-panel: #fafafa;
-  --bg-subtle: #ededed;
-  --bg-muted: #dbdbdb;
-  --bg-fill-tertiary: rgba(0, 0, 0, 0.03);
-  --bg-fill-secondary: rgba(0, 0, 0, 0.06);
-  --bg-fill: rgba(0, 0, 0, 0.12);
-  --bg-elevated: #fafafa;
-  /* Liquid Glass — frosted "regular" material for floating functional layers
-     (nav rail, toolbars, popovers) per the material spec. Translucent surface
-     + backdrop blur; falls back to a solid --bg-panel where unsupported. */
-  --glass-regular: rgba(250, 250, 250, 0.66);
+  color-scheme: dark;
+  --bg: #202020;
+  --bg-app: #202020;
+  --bg-panel: #353535;
+  --bg-subtle: #494949;
+  --bg-muted: #5c5c5c;
+  --bg-fill-tertiary: rgba(255, 255, 255, 0.06);
+  --bg-fill-secondary: rgba(255, 255, 255, 0.10);
+  --bg-fill: rgba(255, 255, 255, 0.16);
+  --bg-elevated: #353535;
+  --glass-regular: rgba(53, 53, 53, 0.66);
   --glass-regular-blur: 28px;
-  /* Bright top-edge sheen that reads as glass thickness on a frosted pane. */
-  --glass-edge-highlight: color-mix(in srgb, #fff 65%, transparent);
-  /* Entry ground shares the app surface — the nav rail is a solid panel now,
-     so the page behind it no longer needs a tinted ground to float on. */
+  --glass-edge-highlight: color-mix(in srgb, #fff 14%, transparent);
   --entry-ground: var(--bg);
-  --border: #dbdbdb;
-  --border-strong: #bdbdbd;
+  --border: #5c5c5c;
+  --border-strong: #848484;
   --border-selected: #a3a3a3;
-  --border-soft: #ededed;
+  --border-soft: #494949;
 
-  --text: #494949;
-  --text-strong: #202020;
-  --text-muted: #5c5c5c;
+  --text: #ededed;
+  --text-strong: #fafafa;
+  --text-muted: #bdbdbd;
   --text-soft: #848484;
-  --text-faint: #bdbdbd;
+  --text-faint: #5c5c5c;
 
-  --accent: #353535;
-  --accent-contrast: #fafafa;
-  --accent-strong: #202020;
-  --accent-soft: #ededed;
-  --accent-tint: #f7f7f7;
-  --accent-hover: #202020;
+  --accent: #ededed;
+  --accent-contrast: #202020;
+  --accent-strong: #fafafa;
+  --accent-soft: #494949;
+  --accent-tint: #353535;
+  --accent-hover: #fafafa;
   --brand: #87ea5c;
-  --brand-weak: #d0ffb5;
-  --brand-soft: #ebffde;
-  --brand-text: #0d5400;
+  --brand-weak: #2f781d;
+  --brand-soft: #164111;
+  --brand-text: #adf788;
 
   /* Semantic accent tints used by tool / status pills. */
-  --green: #00AA54;
-  --green-bg: #f5ffee;
-  --green-border: #adf788;
-  --blue: #1A74FF;
-  --blue-bg: color-mix(in srgb, #1A74FF 10%, #fafafa);
-  --blue-border: color-mix(in srgb, #1A74FF 24%, #dbdbdb);
-  --purple: #353535;
-  --purple-bg: #ededed;
-  --purple-border: #dbdbdb;
-  --red: #F04142;
-  --red-bg: color-mix(in srgb, #F04142 10%, #fafafa);
-  --red-border: color-mix(in srgb, #F04142 24%, #dbdbdb);
-  --amber: #FF7528;
-  --amber-bg: color-mix(in srgb, #FFBA12 18%, #fafafa);
+  --green: #3BBF7D;
+  --green-bg: #164111;
+  --green-border: #2f781d;
+  --blue: #3AA5F0;
+  --blue-bg: color-mix(in srgb, #1A74FF 22%, #202020);
+  --blue-border: color-mix(in srgb, #3AA5F0 34%, #5c5c5c);
+  --purple: #ededed;
+  --purple-bg: #494949;
+  --purple-border: #5c5c5c;
+  --red: #FF5E5E;
+  --red-bg: color-mix(in srgb, #F04142 24%, #202020);
+  --red-border: color-mix(in srgb, #FF5E5E 34%, #5c5c5c);
+  --amber: #FFC740;
+  --amber-bg: color-mix(in srgb, #FFBA12 22%, #202020);
 
-  --shadow-xs: 0 1px 0 rgba(28, 27, 26, 0.04);
-  --shadow-sm: 0 1px 2px rgba(28, 27, 26, 0.05), 0 1px 3px rgba(28, 27, 26, 0.04);
-  --shadow-md: 0 6px 24px rgba(28, 27, 26, 0.07), 0 2px 6px rgba(28, 27, 26, 0.04);
-  --shadow-lg: 0 24px 60px rgba(28, 27, 26, 0.16), 0 8px 16px rgba(28, 27, 26, 0.07);
+  --shadow-xs: 0 1px 0 rgba(0, 0, 0, 0.2);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 6px 24px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.6), 0 8px 16px rgba(0, 0, 0, 0.3);
 
   /* Corner-radius scale — the only radii UI should reach for (Shape
      Consistency Lock). xs for inline code / micro-chips, sm for controls,

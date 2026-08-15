@@ -697,8 +697,7 @@
   color: var(--text-muted);
   font-size: 13px;
   min-height: 320px;
-  /* Plain pure-white surface — grid pattern removed. */
-  background-color: #fff;
+  background-color: var(--bg);
 }
 .df-empty-pill {
   /* Chrome-less: the illustration / title / actions sit directly on the
@@ -1188,7 +1187,7 @@
   min-width: 0;
   border: 1px solid var(--border-soft);
   border-radius: var(--radius);
-  background: #fff;
+  background: var(--bg-panel);
   box-shadow: var(--shadow-sm);
   overflow: hidden;
   transition: border-color 120ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 120ms cubic-bezier(0.23, 1, 0.32, 1);
@@ -1213,7 +1212,7 @@
   border: 0;
   border-bottom: 1px solid var(--border-soft);
   border-radius: 0;
-  background: #fff;
+  background: var(--bg-subtle);
   cursor: pointer;
   position: relative;
   overflow: hidden;
@@ -1222,7 +1221,7 @@
 button.df-card-thumb:hover:not(:disabled),
 button.df-card-thumb:active:not(:disabled),
 button.df-card-thumb:focus:not(:disabled) {
-  background: #fff;
+  background: var(--bg-subtle);
   box-shadow: none;
   filter: none;
 }
@@ -1236,7 +1235,7 @@ button.df-card-thumb:focus:not(:disabled) {
   width: 100%;
   height: 100%;
   border: none;
-  background: #fff;
+  background: var(--bg-subtle);
   display: block;
   pointer-events: none;
 }

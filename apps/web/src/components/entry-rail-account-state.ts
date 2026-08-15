@@ -33,5 +33,5 @@ export function resolveEntryRailAccountFooterState(
   ) {
     return 'recovering';
   }
-  return 'sign-in';
+  return 'hidden';
 }

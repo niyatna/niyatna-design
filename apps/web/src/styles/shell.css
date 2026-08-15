@@ -85,24 +85,28 @@
   margin-right: var(--app-chrome-traffic-margin);
 }
 .workspace-tabs-new-btn {
-  width: 30px;
-  height: 30px;
-  /* Always pinned to the strip's right edge: auto margin absorbs the free
-     space when tabs don't fill the row; the sticky rule below takes over
-     once the strip overflows and scrolls. */
-  margin-left: auto;
+  width: 28px;
+  height: 28px;
+  margin-left: 6px;
   margin-right: 0;
+  margin-bottom: 3px;
   padding: 0;
-  border: 0;
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  background: transparent;
+  background: var(--bg-subtle);
   color: var(--text-muted);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
+  cursor: pointer;
   -webkit-app-region: no-drag;
-  transition: background 100ms var(--ease-out), color 100ms var(--ease-out);
+  transition: all 120ms var(--ease-out);
+}
+.workspace-tabs-new-btn:hover {
+  background: var(--bg-muted);
+  color: var(--text-strong);
+  border-color: var(--border-strong);
 }
 .workspace-tabs-strip.is-overflowing .workspace-tabs-new-btn {
   position: sticky;
@@ -356,24 +360,29 @@ html.od-radial-open .workspace-shell {
    visible even after the project tabs overflow into horizontal scroll. The
    opaque background keeps scrolled tabs from showing through it. */
 .workspace-tab.is-pinned {
-  width: 52px;
-  flex: 0 0 52px;
-  min-width: 52px;
-  max-width: 52px;
+  width: 42px;
+  flex: 0 0 42px;
+  min-width: 42px;
+  max-width: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
-  grid-template-columns: none;
   position: sticky;
   left: var(--workspace-tabs-edge-inset);
   z-index: 2;
-  background: transparent;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+.workspace-tab.is-pinned.is-active {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-bottom-color: var(--bg-panel);
+  color: var(--text-strong);
 }
 .workspace-tab.is-pinned .workspace-tab__label {
   display: none;
 }
 .workspace-tab.is-pinned .workspace-tab__icon {
-  opacity: 0.88;
+  opacity: 0.95;
   margin: 0 auto;
 }
 .workspace-tab.is-pinned .workspace-tab__main {

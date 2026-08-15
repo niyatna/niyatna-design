@@ -1001,19 +1001,8 @@
   flex: 0 0 auto;
   min-width: 0;
 }
-/* The chrome row VISUALLY keeps only the pinned Home tab (per product: 顶部
-   只保留 home 和头像/积分) — project tabs surface through the docked
-   dropdown above instead, never as pills in the chrome. Rows still render
-   (they are the tab machinery's state/measurement/drag DOM), so this is
-   presentation-only. Only the undocked strip can match: the docked strip is
-   portaled into .split-chat-tabs-dock, outside .workspace-tabs-chrome. */
-.workspace-tabs-chrome .workspace-tab:not(.is-pinned) {
-  display: none;
-}
-/* With the active project row hidden the glide pill has nothing to hug —
-   hide it rather than let it collapse onto a zero-rect. */
-.workspace-tabs-chrome:has(.workspace-tab.is-active:not(.is-pinned)) .workspace-tabs-glide {
-  display: none;
+.workspace-tabs-chrome .workspace-tab {
+  display: inline-flex;
 }
 /* Collapse-chat control, lifted from the chat card header into the dock row
    (left of the white tab dropdown). */

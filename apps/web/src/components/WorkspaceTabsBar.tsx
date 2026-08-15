@@ -253,31 +253,6 @@ function uniqueIdForTab(tab: WorkspaceChromeTab): string {
 function normalizeTabsState(state: WorkspaceTabsState): WorkspaceTabsState {
   let sourceTabs = state.tabs.length > 0 ? state.tabs : [createEntryTab('home')];
 
-  // Keep at most one tab per entry view (1 Home tab, 1 Library tab, 1 Brands tab, etc.)
-  const entryTabs = sourceTabs.filter((tab) => tab.kind === 'entry');
-  if (entryTabs.length > 0) {
-    const canonicalByView = new Map<EntryHomeView, WorkspaceChromeTab>();
-    for (const tab of entryTabs) {
-      const existing = canonicalByView.get(tab.view);
-      if (!existing) {
-        canonicalByView.set(tab.view, tab);
-        continue;
-      }
-      const tabIsActive = tab.id === state.activeTabId;
-      const existingIsActive = existing.id === state.activeTabId;
-      const keepTab =
-        (tabIsActive && !existingIsActive) ||
-        (!existingIsActive && tab.lastActiveAt > existing.lastActiveAt);
-      if (keepTab) canonicalByView.set(tab.view, tab);
-    }
-    const canonicalIds = new Set(
-      Array.from(canonicalByView.values()).map((tab) => tab.id),
-    );
-    sourceTabs = sourceTabs.filter(
-      (tab) => tab.kind !== 'entry' || canonicalIds.has(tab.id),
-    );
-  }
-
   // Coalesce duplicate project tabs
   const projectTabs = sourceTabs.filter((tab) => tab.kind === 'project');
   if (projectTabs.length > 0) {
@@ -303,13 +278,9 @@ function normalizeTabsState(state: WorkspaceTabsState): WorkspaceTabsState {
     );
   }
 
-  // Pin the single 'home' entry tab to the leftmost position (index 0).
-  const homeIndex = sourceTabs.findIndex((tab) => tab.kind === 'entry' && tab.view === 'home');
-  if (homeIndex < 0) {
-    sourceTabs = [createEntryTab('home'), ...sourceTabs];
-  } else if (homeIndex > 0) {
-    const [homeTab] = sourceTabs.splice(homeIndex, 1);
-    sourceTabs = [homeTab!, ...sourceTabs];
+  // Ensure at least one tab exists
+  if (sourceTabs.length === 0) {
+    sourceTabs = [createEntryTab('home')];
   }
 
   const usedIds = new Set<string>();
@@ -1328,41 +1299,29 @@ export function WorkspaceTabsBar({
 
   function createNewTab() {
     if (onboardingActive) return;
-    void (async () => {
-      try {
-        const { project } = await createProject({
-          name: 'Proyek Baru',
-          skillId: null,
-          designSystemId: null,
-        });
-        if (project?.id) {
-          navigate({
-            kind: 'project',
-            projectId: project.id,
-            fileName: null,
-          });
-        }
-      } catch {
-        navigate({ kind: 'home', view: 'home' });
-      }
-    })();
+    const normalized = normalizeTabsState(state);
+    const newHomeTab = createEntryTab('home');
+    setState({
+      tabs: [...normalized.tabs, newHomeTab],
+      activeTabId: newHomeTab.id,
+    });
+    navigate({ kind: 'home', view: 'home' });
   }
 
   function closeTab(tabId: string) {
     const normalized = normalizeTabsState(state);
     const closingIndex = normalized.tabs.findIndex((tab) => tab.id === tabId);
     if (closingIndex < 0) return;
-    // Only the primary Home tab is permanent — any other tab can be closed
-    const closingTab = normalized.tabs[closingIndex]!;
-    if (closingTab.kind === 'entry' && closingTab.view === 'home') return;
+    if (normalized.tabs.length <= 1) {
+      const freshHome = createEntryTab('home');
+      setState({ tabs: [freshHome], activeTabId: freshHome.id });
+      navigate({ kind: 'home', view: 'home' });
+      return;
+    }
     let nextRoute: Route | null = null;
     const nextTabs = normalized.tabs.filter((tab) => tab.id !== tabId);
     let nextState: WorkspaceTabsState;
-    if (nextTabs.length === 0) {
-      const homeTab = createEntryTab('home');
-      nextRoute = routeForTab(homeTab);
-      nextState = { tabs: [homeTab], activeTabId: homeTab.id };
-    } else if (normalized.activeTabId !== tabId) {
+    if (normalized.activeTabId !== tabId) {
       nextState = { ...normalized, tabs: nextTabs };
     } else {
       const replacement = nextTabs[Math.min(closingIndex, nextTabs.length - 1)] ?? nextTabs[0]!;
@@ -1638,9 +1597,7 @@ export function WorkspaceTabsBar({
           const display =
             displayTabById.get(tab.id) ?? displayTabFor(tab, projectById, t, knownProjectNamesRef.current);
           const active = tab.id === state.activeTabId;
-          // The single entry tab is permanent and pinned leftmost: it cannot be
-          // closed or dragged out of the first slot, whatever section it shows.
-          const isPinned = tab.kind === 'entry' && tab.view === 'home';
+          const isPinned = state.tabs.length === 1 && tab.kind === 'entry' && tab.view === 'home';
           const dragOverClass =
             dragOverTarget?.tabId === tab.id && draggingTabId !== tab.id
               ? ` is-drag-over-${dragOverTarget.edge}`

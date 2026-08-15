@@ -3401,7 +3401,7 @@ function SubTypeChip({
     >
       <Icon name={sub.icon} size={13} className="home-hero__subtype-chip-icon" />
       <span className="home-hero__subtype-chip-label">
-        {pluginSubfacetLabel(sub.slug, sub.label, t)}
+        {pluginSubfacetLabel(sub.slug, sub.label, t) || sub.label || sub.slug}
       </span>
     </button>
   );
@@ -3562,7 +3562,7 @@ function SubTypeRow({
                   >
                     <Icon name={sub.icon} size={13} className="home-hero__subtype-chip-icon" />
                     <span className="home-hero__subtype-chip-label">
-                      {pluginSubfacetLabel(sub.slug, sub.label, t)}
+                      {pluginSubfacetLabel(sub.slug, sub.label, t) || sub.label || sub.slug}
                     </span>
                     {isActive ? <Icon name="check" size={13} /> : null}
                   </button>
@@ -3582,7 +3582,7 @@ function SubTypeRow({
           <span key={sub.slug} className="home-hero__subtype-chip" data-measure="chip">
             <Icon name={sub.icon} size={13} className="home-hero__subtype-chip-icon" />
             <span className="home-hero__subtype-chip-label">
-              {pluginSubfacetLabel(sub.slug, sub.label, t)}
+              {pluginSubfacetLabel(sub.slug, sub.label, t) || sub.label || sub.slug}
             </span>
           </span>
         ))}

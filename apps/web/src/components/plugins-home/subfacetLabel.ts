@@ -14,34 +14,39 @@ export function pluginSubfacetLabel(
   fallback: string,
   t: ReturnType<typeof useT>,
 ): string {
-  // Deck sub-facets are the 15 commercial "品类" scenes (see `./facets.ts`),
-  // so their slugs are commercial category ids — resolve them through the same
-  // dict the card chip uses so the filter row and the tag read identically.
-  if (isCommercialCategoryId(slug)) return commercialCategoryLabel(slug, t);
-  switch (slug) {
-    case 'business-dashboards': return t('pluginsHome.subfacet.business-dashboards');
-    case 'app-prototypes': return t('pluginsHome.subfacet.app-prototypes');
-    case 'landing-marketing': return t('pluginsHome.subfacet.landing-marketing');
-    case 'developer-tools': return t('pluginsHome.subfacet.developer-tools');
-    case 'docs-reports': return t('pluginsHome.subfacet.docs-reports');
-    case 'brand-design': return t('pluginsHome.subfacet.brand-design');
-    case 'pitch-business': return t('pluginsHome.subfacet.pitch-business');
-    case 'course-training': return t('pluginsHome.subfacet.course-training');
-    case 'reports-briefings': return t('pluginsHome.subfacet.reports-briefings');
-    case 'product-sales': return t('pluginsHome.subfacet.product-sales');
-    case 'engineering-talks': return t('pluginsHome.subfacet.engineering-talks');
-    case 'creative-decks': return t('pluginsHome.subfacet.creative-decks');
-    case 'ui-product-mockups': return t('pluginsHome.subfacet.ui-product-mockups');
-    case 'brand-visuals': return t('pluginsHome.subfacet.brand-visuals');
-    case 'storyboards-motion-refs': return t('pluginsHome.subfacet.storyboards-motion-refs');
-    case 'social-content': return t('pluginsHome.subfacet.social-content');
-    case 'avatar-portrait': return t('pluginsHome.subfacet.avatar-portrait');
-    case 'illustration-style': return t('pluginsHome.subfacet.illustration-style');
-    case 'motion-effects': return t('pluginsHome.subfacet.motion-effects');
-    case 'social-short-form': return t('pluginsHome.subfacet.social-short-form');
-    case 'marketing-product': return t('pluginsHome.subfacet.marketing-product');
-    case 'data-explainers': return t('pluginsHome.subfacet.data-explainers');
-    case 'cinematic-story': return t('pluginsHome.subfacet.cinematic-story');
-    default: return fallback;
+  let label = '';
+  if (isCommercialCategoryId(slug)) {
+    label = commercialCategoryLabel(slug, t);
+  } else {
+    switch (slug) {
+      case 'business-dashboards': label = t('pluginsHome.subfacet.business-dashboards'); break;
+      case 'app-prototypes': label = t('pluginsHome.subfacet.app-prototypes'); break;
+      case 'landing-marketing': label = t('pluginsHome.subfacet.landing-marketing'); break;
+      case 'developer-tools': label = t('pluginsHome.subfacet.developer-tools'); break;
+      case 'docs-reports': label = t('pluginsHome.subfacet.docs-reports'); break;
+      case 'brand-design': label = t('pluginsHome.subfacet.brand-design'); break;
+      case 'pitch-business': label = t('pluginsHome.subfacet.pitch-business'); break;
+      case 'course-training': label = t('pluginsHome.subfacet.course-training'); break;
+      case 'reports-briefings': label = t('pluginsHome.subfacet.reports-briefings'); break;
+      case 'product-sales': label = t('pluginsHome.subfacet.product-sales'); break;
+      case 'engineering-talks': label = t('pluginsHome.subfacet.engineering-talks'); break;
+      case 'creative-decks': label = t('pluginsHome.subfacet.creative-decks'); break;
+      case 'ui-product-mockups': label = t('pluginsHome.subfacet.ui-product-mockups'); break;
+      case 'brand-visuals': label = t('pluginsHome.subfacet.brand-visuals'); break;
+      case 'storyboards-motion-refs': label = t('pluginsHome.subfacet.storyboards-motion-refs'); break;
+      case 'social-content': label = t('pluginsHome.subfacet.social-content'); break;
+      case 'avatar-portrait': label = t('pluginsHome.subfacet.avatar-portrait'); break;
+      case 'illustration-style': label = t('pluginsHome.subfacet.illustration-style'); break;
+      case 'motion-effects': label = t('pluginsHome.subfacet.motion-effects'); break;
+      case 'social-short-form': label = t('pluginsHome.subfacet.social-short-form'); break;
+      case 'marketing-product': label = t('pluginsHome.subfacet.marketing-product'); break;
+      case 'data-explainers': label = t('pluginsHome.subfacet.data-explainers'); break;
+      case 'cinematic-story': label = t('pluginsHome.subfacet.cinematic-story'); break;
+      default: label = fallback; break;
+    }
   }
+  if (!label || label.startsWith('pluginsHome.') || label.trim() === '') {
+    return fallback || slug;
+  }
+  return label;
 }

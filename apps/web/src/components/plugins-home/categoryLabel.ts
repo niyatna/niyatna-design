@@ -94,21 +94,26 @@ export function commercialCategoryLabel(
   id: CommercialCategoryId,
   t: ReturnType<typeof useT>,
 ): string {
+  let label = '';
   switch (id) {
-    case 'student-coursework': return t('pluginsHome.commercialCategory.student-coursework');
-    case 'corporate-strategy': return t('pluginsHome.commercialCategory.corporate-strategy');
-    case 'professional-training': return t('pluginsHome.commercialCategory.professional-training');
-    case 'b2b-sales': return t('pluginsHome.commercialCategory.b2b-sales');
-    case 'academic-research': return t('pluginsHome.commercialCategory.academic-research');
-    case 'marketing-gtm': return t('pluginsHome.commercialCategory.marketing-gtm');
-    case 'data-finance': return t('pluginsHome.commercialCategory.data-finance');
-    case 'fundraising-pitch': return t('pluginsHome.commercialCategory.fundraising-pitch');
-    case 'government-policy': return t('pluginsHome.commercialCategory.government-policy');
-    case 'product-management': return t('pluginsHome.commercialCategory.product-management');
-    case 'consulting': return t('pluginsHome.commercialCategory.consulting');
-    case 'career': return t('pluginsHome.commercialCategory.career');
-    case 'ai-literacy': return t('pluginsHome.commercialCategory.ai-literacy');
-    case 'life': return t('pluginsHome.commercialCategory.life');
-    case 'design-craft': return t('pluginsHome.commercialCategory.design-craft');
+    case 'student-coursework': label = t('pluginsHome.commercialCategory.student-coursework'); break;
+    case 'corporate-strategy': label = t('pluginsHome.commercialCategory.corporate-strategy'); break;
+    case 'professional-training': label = t('pluginsHome.commercialCategory.professional-training'); break;
+    case 'b2b-sales': label = t('pluginsHome.commercialCategory.b2b-sales'); break;
+    case 'academic-research': label = t('pluginsHome.commercialCategory.academic-research'); break;
+    case 'marketing-gtm': label = t('pluginsHome.commercialCategory.marketing-gtm'); break;
+    case 'data-finance': label = t('pluginsHome.commercialCategory.data-finance'); break;
+    case 'fundraising-pitch': label = t('pluginsHome.commercialCategory.fundraising-pitch'); break;
+    case 'government-policy': label = t('pluginsHome.commercialCategory.government-policy'); break;
+    case 'product-management': label = t('pluginsHome.commercialCategory.product-management'); break;
+    case 'consulting': label = t('pluginsHome.commercialCategory.consulting'); break;
+    case 'career': label = t('pluginsHome.commercialCategory.career'); break;
+    case 'ai-literacy': label = t('pluginsHome.commercialCategory.ai-literacy'); break;
+    case 'life': label = t('pluginsHome.commercialCategory.life'); break;
+    case 'design-craft': label = t('pluginsHome.commercialCategory.design-craft'); break;
   }
+  if (!label || label.startsWith('pluginsHome.') || label.trim() === '') {
+    return id.replace(/-/g, ' ');
+  }
+  return label;
 }

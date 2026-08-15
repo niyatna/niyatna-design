@@ -3495,6 +3495,7 @@ function SubTypeRow({
   const visibleChips = subChips.slice(0, visibleCount);
   const overflowChips = subChips.slice(visibleCount);
   const overflowActive = overflowChips.some((sub) => sub.slug === selectedSlug);
+  const allChipLabel = t('common.all') || 'Semua';
   const allChip = (
     <button
       type="button"
@@ -3506,7 +3507,8 @@ function SubTypeRow({
       role="tab"
       aria-selected={allActive}
     >
-      <span className="home-hero__subtype-chip-label">{t('common.all') || 'Semua'}</span>
+      <Icon name="sparkles" size={13} className="home-hero__subtype-chip-icon" />
+      <span className="home-hero__subtype-chip-label">{allChipLabel}</span>
     </button>
   );
 
@@ -3576,7 +3578,8 @@ function SubTypeRow({
           widths so the visible row can compute how many fit. */}
       <div className="home-hero__subtype-measure" aria-hidden ref={measureRef}>
         <span className="home-hero__subtype-chip" data-measure="all">
-          <span className="home-hero__subtype-chip-label">{t('common.all') || 'Semua'}</span>
+          <Icon name="sparkles" size={13} className="home-hero__subtype-chip-icon" />
+          <span className="home-hero__subtype-chip-label">{allChipLabel}</span>
         </span>
         {subChips.map((sub) => (
           <span key={sub.slug} className="home-hero__subtype-chip" data-measure="chip">

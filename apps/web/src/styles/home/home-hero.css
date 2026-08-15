@@ -367,13 +367,14 @@
   transform: translateY(-0.5px);
 }
 .home-hero__subtype-chip.is-active {
-  background: var(--accent-tint);
-  border-color: color-mix(in srgb, var(--accent) 42%, var(--border));
-  color: var(--accent);
+  background: var(--bg-panel, #353535);
+  border-color: var(--border-strong, #848484);
+  color: var(--text-strong, #fafafa);
 }
 .home-hero__subtype-chip.is-active:hover:not(:disabled) {
-  background: var(--accent-tint);
-  color: var(--accent);
+  background: color-mix(in srgb, var(--text) 8%, var(--bg-panel));
+  border-color: var(--border-selected, #a3a3a3);
+  color: var(--text-strong, #fafafa);
 }
 .home-hero__subtype-chip.is-pending {
   opacity: 0.65;

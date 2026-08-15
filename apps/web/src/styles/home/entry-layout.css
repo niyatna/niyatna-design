@@ -109,7 +109,7 @@
   /* White frost: pure-white base at 65% alpha, so the card reads white but
      keeps the frosted-glass translucency (the panel's material-thin backdrop
      blur below does the frosting). */
-  --rail-surface: rgba(255, 255, 255, 0.65);
+  --rail-surface: rgba(36, 36, 36, 0.85);
   background: var(--rail-surface);
   -webkit-backdrop-filter: var(--material-thin-backdrop);
   backdrop-filter: var(--material-thin-backdrop);
@@ -849,10 +849,11 @@
   text-overflow: ellipsis;
 }
 .entry-nav-rail__btn.is-active .entry-nav-rail__btn-icon {
-  color: var(--selected);
+  color: var(--text-strong);
 }
 .entry-nav-rail__btn.is-active .entry-nav-rail__btn-label {
-  font-weight: 400;
+  font-weight: 500;
+  color: var(--text-strong);
 }
 
 /* Search box */
@@ -877,10 +878,9 @@
   height: 34px;
   margin: 4px 0 10px;
   padding: 0 10px;
-  /* White to match the rail surface; a border keeps the input visible on it. */
   border: 1px solid var(--border);
   border-radius: var(--radius-large, 8px);
-  background: var(--rail-surface, #fff);
+  background: var(--bg-panel);
   color: var(--text-soft);
   transition:
     background-color var(--duration-ultra-fast) var(--curve-easy-ease),
@@ -1065,10 +1065,8 @@
   border-color: transparent;
 }
 .entry-nav-rail__btn.is-active {
-  /* Selected = one step above the lightest surface gray (--bg-subtle #ededed)
-     under the spec's selection color (--selected #353535) for label + icon. */
   background: var(--bg-subtle);
-  color: var(--selected);
+  color: var(--text-strong);
   border-color: transparent;
 }
 .entry-nav-rail__btn.is-active:hover {

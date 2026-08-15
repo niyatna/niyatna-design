@@ -574,19 +574,21 @@
   min-width: 80px;
   min-height: 28px;
   padding: 0 11px;
-  border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--border));
+  border: 1px solid var(--border-strong);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--accent) 8%, var(--bg));
-  color: var(--accent);
+  background: var(--bg-subtle);
+  color: var(--text-strong);
   font: inherit;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
+  transition: all 120ms var(--ease-out);
 }
 
 .plugin-marketplace__row-action:hover:not(:disabled) {
-  border-color: color-mix(in srgb, var(--accent) 34%, var(--border));
-  background: color-mix(in srgb, var(--accent) 12%, var(--bg));
+  border-color: var(--border-selected);
+  background: var(--bg-muted);
+  color: #ffffff;
 }
 
 /* A row action that cannot run right now (an install waiting behind another
@@ -1352,9 +1354,9 @@
     border-color 140ms var(--ease-out);
 }
 .community-template-card__foot button:hover:not(:disabled) {
-  background: var(--text-strong);
-  border-color: transparent;
-  color: var(--brand, #87ea5c);
+  background: var(--bg-muted);
+  border-color: var(--border-selected);
+  color: #ffffff;
   filter: none;
 }
 /* Remix + Prompt sit side by side on the right. */
@@ -1432,11 +1434,10 @@
   color: var(--text-strong);
 }
 
-/* Selected pill mirrors the card-button hover: black fill, green ink. */
 .community-template-view__type-tabs button.is-active,
 .community-template-view__subtabs button.is-active {
-  background: var(--text-strong);
-  color: var(--brand, #87ea5c);
+  background: var(--bg-subtle);
+  color: var(--text-strong);
 }
 
 .community-template-view__search-clear {
@@ -1777,9 +1778,9 @@
     border-color 140ms var(--ease-out);
 }
 .community-template-preview__foot button:hover:not(:disabled) {
-  background: var(--text-strong);
-  border-color: transparent;
-  color: var(--brand, #87ea5c);
+  background: var(--bg-muted);
+  border-color: var(--border-selected);
+  color: #ffffff;
   filter: none;
 }
 

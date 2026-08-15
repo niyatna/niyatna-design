@@ -104,8 +104,8 @@
      fidelity card, focused input ring, active filter pill — so a primary
      CTA and a selected state can coexist on the same screen without
      competing. --selected-soft is the 16% tint for outer rings / fills. */
-  --selected: #353535;
-  --selected-soft: color-mix(in srgb, #353535 12%, transparent);
+  --selected: #fafafa;
+  --selected-soft: color-mix(in srgb, #fafafa 12%, transparent);
 
   --serif: "Albert Sans", "PingFang SC", "Microsoft YaHei", sans-serif;
   --sans: "Albert Sans", "PingFang SC", "Microsoft YaHei", sans-serif;
@@ -137,9 +137,10 @@
   --glass-regular: rgba(53, 53, 53, 0.66);
   --glass-edge-highlight: color-mix(in srgb, #fff 14%, transparent);
   --border: #5c5c5c;
-  --border-strong: #848484;
   --border-selected: #a3a3a3;
   --border-soft: #494949;
+  --selected: #fafafa;
+  --selected-soft: color-mix(in srgb, #fafafa 12%, transparent);
 
   --text: #ededed;
   --text-strong: #fafafa;
@@ -198,9 +199,10 @@
     --glass-regular: rgba(53, 53, 53, 0.66);
     --glass-edge-highlight: color-mix(in srgb, #fff 14%, transparent);
     --border: #5c5c5c;
-    --border-strong: #848484;
     --border-selected: #a3a3a3;
     --border-soft: #494949;
+    --selected: #fafafa;
+    --selected-soft: color-mix(in srgb, #fafafa 12%, transparent);
 
     --text: #ededed;
     --text-strong: #fafafa;

@@ -215,15 +215,8 @@ function reviveTab(value: unknown): WorkspaceChromeTab | null {
   if (!id) return null;
   if (record.kind === 'entry') {
     const view = record.view;
-    if (
-      view === 'home'
-      || view === 'projects'
-      || view === 'tasks'
-      || view === 'plugins'
-      || view === 'design-systems'
-      || view === 'integrations'
-    ) {
-      return { id, kind: 'entry', view, createdAt, lastActiveAt };
+    if (typeof view === 'string' && view.length > 0) {
+      return { id, kind: 'entry', view: view as EntryHomeView, createdAt, lastActiveAt };
     }
   }
   if (record.kind === 'project' && typeof record.projectId === 'string') {
@@ -260,34 +253,32 @@ function uniqueIdForTab(tab: WorkspaceChromeTab): string {
 function normalizeTabsState(state: WorkspaceTabsState): WorkspaceTabsState {
   let sourceTabs = state.tabs.length > 0 ? state.tabs : [createEntryTab('home')];
 
-  // Deduplicate entry tabs (singleton constraint): all sidebar sections
-  // (home / projects / tasks / design-systems / plugins / integrations) share
-  // ONE entry tab that switches its view in place. Keep the canonical one:
-  // 1. Is one of them currently active?
-  // 2. Otherwise, pick the one with highest lastActiveAt.
-  // 3. Otherwise, pick the first one.
+  // Keep at most one tab per entry view (1 Home tab, 1 Library tab, 1 Brands tab, etc.)
   const entryTabs = sourceTabs.filter((tab) => tab.kind === 'entry');
-  if (entryTabs.length > 1) {
-    let canonicalEntry = entryTabs.find((tab) => tab.id === state.activeTabId);
-    if (!canonicalEntry) {
-      canonicalEntry = entryTabs.reduce((newest, currentTab) =>
-        currentTab.lastActiveAt > newest.lastActiveAt ? currentTab : newest,
-        entryTabs[0]!
-      );
+  if (entryTabs.length > 0) {
+    const canonicalByView = new Map<EntryHomeView, WorkspaceChromeTab>();
+    for (const tab of entryTabs) {
+      const existing = canonicalByView.get(tab.view);
+      if (!existing) {
+        canonicalByView.set(tab.view, tab);
+        continue;
+      }
+      const tabIsActive = tab.id === state.activeTabId;
+      const existingIsActive = existing.id === state.activeTabId;
+      const keepTab =
+        (tabIsActive && !existingIsActive) ||
+        (!existingIsActive && tab.lastActiveAt > existing.lastActiveAt);
+      if (keepTab) canonicalByView.set(tab.view, tab);
     }
-    // Drop every other entry tab; the survivor keeps its own view so the
-    // section the user was on is preserved.
+    const canonicalIds = new Set(
+      Array.from(canonicalByView.values()).map((tab) => tab.id),
+    );
     sourceTabs = sourceTabs.filter(
-      (tab) => tab.kind !== 'entry' || tab.id === canonicalEntry!.id,
+      (tab) => tab.kind !== 'entry' || canonicalIds.has(tab.id),
     );
   }
 
-  // Coalesce duplicate project tabs (one-project/one-tab invariant): a
-  // workspace restored from localStorage can already hold several tabs for the
-  // same projectId if the user hit the duplicate-tab bug before upgrading.
-  // Keep one canonical tab per projectId — the active match, else the newest —
-  // and drop the rest. This runs on every normalize, so it repairs persisted
-  // state as well as preventing new corruption. See issue #2641.
+  // Coalesce duplicate project tabs
   const projectTabs = sourceTabs.filter((tab) => tab.kind === 'project');
   if (projectTabs.length > 0) {
     const canonicalByProject = new Map<string, WorkspaceChromeTab>();
@@ -297,7 +288,6 @@ function normalizeTabsState(state: WorkspaceTabsState): WorkspaceTabsState {
         canonicalByProject.set(tab.projectId, tab);
         continue;
       }
-      // Prefer the currently active tab; otherwise keep the most recently used.
       const tabIsActive = tab.id === state.activeTabId;
       const existingIsActive = existing.id === state.activeTabId;
       const keepTab =
@@ -313,18 +303,13 @@ function normalizeTabsState(state: WorkspaceTabsState): WorkspaceTabsState {
     );
   }
 
-  // Pin the single entry tab to the leftmost position (Figma-style). It is the
-  // one permanent, non-closable tab regardless of which section it currently
-  // shows; project / marketplace tabs always sit to its right in insertion
-  // order. If no entry tab survives normalization — e.g. a user who reopens on
-  // a saved `[project, ...]` workspace — create one so the invariant "an entry
-  // tab always exists and is leftmost" holds for migrated state too.
-  const entryIndex = sourceTabs.findIndex((tab) => tab.kind === 'entry');
-  if (entryIndex < 0) {
+  // Pin the single 'home' entry tab to the leftmost position (index 0).
+  const homeIndex = sourceTabs.findIndex((tab) => tab.kind === 'entry' && tab.view === 'home');
+  if (homeIndex < 0) {
     sourceTabs = [createEntryTab('home'), ...sourceTabs];
-  } else if (entryIndex > 0) {
-    const [entryTab] = sourceTabs.splice(entryIndex, 1);
-    sourceTabs = [entryTab!, ...sourceTabs];
+  } else if (homeIndex > 0) {
+    const [homeTab] = sourceTabs.splice(homeIndex, 1);
+    sourceTabs = [homeTab!, ...sourceTabs];
   }
 
   const usedIds = new Set<string>();
@@ -533,21 +518,39 @@ function syncStateToRoute(state: WorkspaceTabsState, route: Route): WorkspaceTab
   const current = normalizeTabsState(state);
   const currentActive = current.tabs.find((tab) => tab.id === current.activeTabId) ?? null;
 
-  // 1. If we are navigating to any entry view (home / projects / tasks /
-  // design-systems / plugins / integrations / onboarding), reuse the single
-  // entry tab and switch its view IN PLACE — all sidebar sections collapse
-  // into the one leftmost tab. Only create one if none exists.
   if (route.kind === 'home') {
-    const existingEntryTab = current.tabs.find((tab) => tab.kind === 'entry');
-    if (existingEntryTab) {
+    if (route.view === 'home') {
+      const homeTab = current.tabs.find((tab) => tab.kind === 'entry' && tab.view === 'home');
+      if (homeTab) {
+        return normalizeTabsState({
+          ...current,
+          tabs: current.tabs.map((tab) =>
+            tab.id === homeTab.id
+              ? { ...tab, lastActiveAt: timestamp }
+              : tab,
+          ),
+          activeTabId: homeTab.id,
+        });
+      }
+      const nextTab = createEntryTab('home', timestamp);
+      return normalizeTabsState({
+        tabs: [nextTab, ...current.tabs],
+        activeTabId: nextTab.id,
+      });
+    }
+
+    const existingViewTab = current.tabs.find(
+      (tab) => tab.kind === 'entry' && tab.view === route.view,
+    );
+    if (existingViewTab) {
       return normalizeTabsState({
         ...current,
         tabs: current.tabs.map((tab) =>
-          tab.id === existingEntryTab.id
-            ? { ...tab, view: route.view, lastActiveAt: timestamp }
+          tab.id === existingViewTab.id
+            ? { ...tab, lastActiveAt: timestamp }
             : tab,
         ),
-        activeTabId: existingEntryTab.id,
+        activeTabId: existingViewTab.id,
       });
     }
     const nextTab = tabFromRoute(route, timestamp);
@@ -681,9 +684,6 @@ export function WorkspaceTabsBar({
   } | null>(null);
   const stateRef = useRef(state);
   stateRef.current = state;
-  // #5517 corner fan: the "+" button opens a corner-anchored radial menu of
-  // template wedges instead of immediately spawning a home tab.
-  const [radialMenu, setRadialMenu] = useState<{ x: number; y: number } | null>(null);
   // Docked-mode white dropdown (project route): open state of its tab list.
   const [dockMenuOpen, setDockMenuOpen] = useState(false);
   // Most-recently-activated tab ids, newest first — the dropdown lists tabs
@@ -695,24 +695,6 @@ export function WorkspaceTabsBar({
     if (!id) return;
     tabMruRef.current = [id, ...tabMruRef.current.filter((x) => x !== id)].slice(0, 50);
   }, [state.activeTabId]);
-  const [radialHoverId, setRadialHoverId] = useState<string | null>(null);
-  useEffect(() => {
-    if (!radialMenu) setRadialHoverId(null);
-  }, [radialMenu]);
-  useEffect(() => {
-    if (!radialMenu) return;
-    // Uniform page blur: filter on the shell blurs every descendant equally
-    // (backdrop-filter on the scrim sampled composited layers unevenly).
-    document.documentElement.classList.add('od-radial-open');
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setRadialMenu(null);
-    };
-    window.addEventListener('keydown', onKey);
-    return () => {
-      document.documentElement.classList.remove('od-radial-open');
-      window.removeEventListener('keydown', onKey);
-    };
-  }, [radialMenu]);
   const [tabsOverflowing, setTabsOverflowing] = useState(false);
   const stripRef = useRef<HTMLDivElement | null>(null);
   const previousOnboardingCompletedRef = useRef(onboardingCompleted);
@@ -1341,113 +1323,23 @@ export function WorkspaceTabsBar({
       dragSuppressClickRef.current = false;
       return;
     }
-    // Clicking the pinned Home tab always lands on the home page, whatever
-    // entry section (projects / design-systems / …) the tab last showed.
-    // Keyboard tab-cycling goes through activateTab directly and keeps the
-    // remembered section.
-    if (tab.kind === 'entry' && tab.view !== 'home') {
-      activateTab({ ...tab, view: 'home' });
-      return;
-    }
     activateTab(tab);
   }
 
-  // Corner-anchored radial fan menu on the "+" button: three concentric bands
-  // sweep down-left from the button (the pivot at the top-right corner),
-  // carrying the composer Template picker's icons. Each band is a ring split
-  // into angular wedges — 3 / 4 from the inner bands outward, with the outer
-  // band absorbing every remaining template (see `radialSlots`).
-  // Picking a wedge opens the home tab with that template applied to the hero.
-  const RADIAL_SIZE = 300;
-  const RADIAL_PAD = 24;
-  const RADIAL_R_IN = 56;
-  const RADIAL_R_OUT = 264;
-  const RADIAL_BANDS = [3, 4, 3];
-  const RADIAL_START = 96; // fan start angle (screen degrees) …
-  const RADIAL_SWEEP = 78; // … total arc, fanning toward the left
-  const RADIAL_GAP = 0; // wedges abut; hairline strokes are the dividers
-  const RADIAL_CX = RADIAL_SIZE - RADIAL_PAD;
-  const RADIAL_CY = RADIAL_PAD;
-
-  function radialBandRadius(band: number): number {
-    return RADIAL_R_IN + ((RADIAL_R_OUT - RADIAL_R_IN) * band) / RADIAL_BANDS.length;
-  }
-
-  // Per-template placement across the bands, aligned to template order.
-  const radialSlots = useMemo(() => {
-    const chips = orderedCreateChips().filter((chip) => chip.action.kind === 'apply-scenario');
-    const slots: Array<{ chip: HomeHeroChip; band: number; seg: number; segCount: number }> = [];
-    let cursor = 0;
-    RADIAL_BANDS.forEach((count, band) => {
-      const isLast = band === RADIAL_BANDS.length - 1;
-      const remaining = Math.max(chips.length - cursor, 0);
-      const take = isLast ? remaining : Math.min(count, remaining);
-      for (let seg = 0; seg < take; seg += 1) {
-        const chip = chips[cursor + seg];
-        if (chip) slots.push({ chip, band, seg, segCount: take });
-      }
-      cursor += take;
-    });
-    return slots;
-  }, []);
-
-  function radialWedgeAngles(seg: number, segCount: number): [number, number] {
-    const step = RADIAL_SWEEP / segCount;
-    return [RADIAL_START + seg * step + RADIAL_GAP / 2, RADIAL_START + (seg + 1) * step - RADIAL_GAP / 2];
-  }
-
-  function radialSectorPath(cx: number, cy: number, a1: number, a2: number, r0: number, r1: number): string {
-    const rad = (a: number) => (a * Math.PI) / 180;
-    const px = (r: number, a: number) => `${(cx + r * Math.cos(rad(a))).toFixed(2)} ${(cy + r * Math.sin(rad(a))).toFixed(2)}`;
-    return `M ${px(r1, a1)} A ${r1} ${r1} 0 0 1 ${px(r1, a2)} L ${px(r0, a2)} A ${r0} ${r0} 0 0 0 ${px(r0, a1)} Z`;
-  }
-
-  function openEntryView(view: EntryHomeView) {
-    const normalized = normalizeTabsState(state);
-    const existingEntryTab = normalized.tabs.find((tab) => tab.kind === 'entry');
-    if (existingEntryTab) {
-      setState({ ...normalized, activeTabId: existingEntryTab.id });
-    } else {
-      const tab = createEntryTab(view);
-      setState({ tabs: [...normalized.tabs, tab], activeTabId: tab.id });
-    }
-    navigate({ kind: 'home', view });
-    setRadialMenu(null);
-  }
-
-  function openTemplateFromRadial(chip: HomeHeroChip) {
-    openEntryView('home');
-    // Hand the pick to the hero once the home tab has mounted/activated —
-    // HomeHero applies the chip exactly as if its own picker was clicked.
-    window.setTimeout(() => {
-      window.dispatchEvent(
-        new CustomEvent(HOME_APPLY_TEMPLATE_EVENT, { detail: { chipId: chip.id } }),
-      );
-    }, 50);
-  }
-
-  function openRadialMenu(event: React.MouseEvent<HTMLButtonElement>) {
-    if (onboardingActive) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    setRadialMenu((cur) => (cur ? null : { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }));
-  }
-
   function createNewTab() {
-    // Onboarding gate — see `onboardingActive`. Covers the "+" button and the
-    // Cmd/Ctrl+T keyboard shortcut, since both funnel through here.
     if (onboardingActive) return;
     const normalized = normalizeTabsState(state);
-    const existingEntryTab = normalized.tabs.find((tab) => tab.kind === 'entry');
-    if (existingEntryTab) {
+    const homeTab = normalized.tabs.find((tab) => tab.kind === 'entry' && tab.view === 'home');
+    if (homeTab) {
       setState({
         ...normalized,
-        activeTabId: existingEntryTab.id,
+        activeTabId: homeTab.id,
       });
       navigate({ kind: 'home', view: 'home' });
     } else {
       const tab = createEntryTab('home');
       setState({
-        tabs: [...normalized.tabs, tab],
+        tabs: [tab, ...normalized.tabs],
         activeTabId: tab.id,
       });
       navigate({ kind: 'home', view: 'home' });
@@ -1458,10 +1350,9 @@ export function WorkspaceTabsBar({
     const normalized = normalizeTabsState(state);
     const closingIndex = normalized.tabs.findIndex((tab) => tab.id === tabId);
     if (closingIndex < 0) return;
-    // The single entry tab is permanent — never close it, whatever section
-    // (home / projects / design-systems / …) it currently shows.
+    // Only the primary Home tab is permanent — any other tab can be closed
     const closingTab = normalized.tabs[closingIndex]!;
-    if (closingTab.kind === 'entry') return;
+    if (closingTab.kind === 'entry' && closingTab.view === 'home') return;
     let nextRoute: Route | null = null;
     const nextTabs = normalized.tabs.filter((tab) => tab.id !== tabId);
     let nextState: WorkspaceTabsState;
@@ -1747,7 +1638,7 @@ export function WorkspaceTabsBar({
           const active = tab.id === state.activeTabId;
           // The single entry tab is permanent and pinned leftmost: it cannot be
           // closed or dragged out of the first slot, whatever section it shows.
-          const isPinned = tab.kind === 'entry';
+          const isPinned = tab.kind === 'entry' && tab.view === 'home';
           const dragOverClass =
             dragOverTarget?.tabId === tab.id && draggingTabId !== tab.id
               ? ` is-drag-over-${dragOverTarget.edge}`
@@ -1763,11 +1654,7 @@ export function WorkspaceTabsBar({
               onDragStart={(event) => handleTabDragStart(tab.id, event)}
               onDragEnd={handleTabDragEnd}
             >
-              {isPinned && active && tab.view === 'home' ? (
-                /* Home view: the pinned tab is the brand-logo button. The
-                   COLLAPSE control moved into the rail (after its search box),
-                   so the logo only re-opens a collapsed rail — with the rail
-                   open it is inert (you are already home, nothing to expand). */
+              {isPinned ? (
                 <button
                   type="button"
                   className={`workspace-tab__rail-toggle od-tooltip${entryRailOpen ? ' is-inert' : ''}`}
@@ -1785,9 +1672,6 @@ export function WorkspaceTabsBar({
                   }}
                 >
                   <ChromeHomeGlyph />
-                  {/* Collapsed-rail hover swaps the logo for the expand-sidebar
-                      glyph, so the button telegraphs its one action. CSS keys
-                      the swap off :not(.is-inert):hover. */}
                   <svg
                     className="workspace-chrome-logo-swap"
                     viewBox="0 0 24 24"
@@ -1797,25 +1681,6 @@ export function WorkspaceTabsBar({
                     <path d="M5 5H13V19H5V5ZM19 19H15V5H19V19ZM4 3C3.44772 3 3 3.44772 3 4V20C3 20.5523 3.44772 21 4 21H20C20.5523 21 21 20.5523 21 20V4C21 3.44772 20.5523 3 20 3H4ZM11 12L7 8.5V15.5L11 12Z" />
                   </svg>
                 </button>
-              ) : isPinned && active ? (
-                /* Any other entry section (settings / all-projects / community /
-                   design-systems …): the logo reads as Home; clicking returns
-                   home. */
-                <button
-                  type="button"
-                  className="workspace-tab__rail-toggle od-tooltip"
-                  aria-label={t('entry.navHome')}
-                  title={t('entry.navHome')}
-                  data-tooltip={t('entry.navHome')}
-                  data-tooltip-placement="bottom"
-                  data-testid="workspace-home-nav"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    openTab(tab);
-                  }}
-                >
-                  <ChromeHomeGlyph />
-                </button>
               ) : (
                 <>
                   <button
@@ -1824,32 +1689,21 @@ export function WorkspaceTabsBar({
                     onClick={() => openTab(tab)}
                   >
                     <span className="workspace-tab__icon" aria-hidden>
-                      {/* The pinned entry tab remembers its last section
-                          (settings / community / …), but clicking it always
-                          lands on home (openTab), so it must read as the Home
-                          button — the brand logo — not the remembered
-                          section's icon. */}
-                      {isPinned ? (
-                        <ChromeHomeGlyph />
-                      ) : (
-                        <Icon name={display.icon} size={14} />
-                      )}
+                      <Icon name={display.icon} size={14} />
                     </span>
                     <span className="workspace-tab__label">{display.title}</span>
                   </button>
-                  {isPinned ? null : (
-                    <button
-                      type="button"
-                      className="workspace-tab__close od-tooltip"
-                      aria-label={t('common.close')}
-                      title={t('common.close')}
-                      data-tooltip={t('common.close')}
-                      data-tooltip-placement="bottom"
-                      onClick={() => closeTab(tab.id)}
-                    >
-                      <Icon name="close" size={14} />
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    className="workspace-tab__close od-tooltip"
+                    aria-label={t('common.close')}
+                    title={t('common.close')}
+                    data-tooltip={t('common.close')}
+                    data-tooltip-placement="bottom"
+                    onClick={() => closeTab(tab.id)}
+                  >
+                    <Icon name="close" size={14} />
+                  </button>
                 </>
               )}
             </div>
@@ -1858,80 +1712,18 @@ export function WorkspaceTabsBar({
         <button
           type="button"
           className="workspace-tabs-new-btn od-tooltip"
-          aria-label={t('workspaceTabs.newTab') || 'New tab'}
-          title={t('workspaceTabs.newTab') || 'New tab'}
-          data-tooltip={t('workspaceTabs.newTab') || 'New tab'}
+          aria-label={t('workspace.newTab') || 'Tab baru'}
+          title={t('workspace.newTab') || 'Tab baru'}
+          data-tooltip={t('workspace.newTab') || 'Tab baru'}
           data-tooltip-placement="bottom"
           data-testid="workspace-tabs-add"
-          onClick={openRadialMenu}
+          onClick={createNewTab}
         >
           <Icon name="plus" size={16} />
         </button>
       </div>
       </>,
       )}
-      {radialMenu ? createPortal(
-        <div className="workspace-radial-layer" onMouseDown={() => setRadialMenu(null)}>
-          <div
-            className="workspace-radial-menu"
-            style={{ left: radialMenu.x - (RADIAL_SIZE - RADIAL_PAD), top: radialMenu.y - RADIAL_PAD, width: RADIAL_SIZE, height: RADIAL_SIZE }}
-            onMouseDown={(event) => event.stopPropagation()}
-          >
-            <svg width={RADIAL_SIZE} height={RADIAL_SIZE} viewBox={`0 0 ${RADIAL_SIZE} ${RADIAL_SIZE}`}>
-              {radialSlots.map((slot) => {
-                const [a1, a2] = radialWedgeAngles(slot.seg, slot.segCount);
-                const r0 = radialBandRadius(slot.band);
-                const r1 = radialBandRadius(slot.band + 1);
-                const isHover = slot.chip.id === radialHoverId;
-                return (
-                  <path
-                    key={slot.chip.id}
-                    className={`workspace-radial-sector-path${isHover ? ' is-hover' : ''}`}
-                    d={radialSectorPath(RADIAL_CX, RADIAL_CY, a1, a2, r0, r1)}
-                    role="menuitem"
-                    aria-label={homeHeroChipLabel(slot.chip.id, t)}
-                    data-testid={`workspace-radial-template-${slot.chip.id}`}
-                    onMouseEnter={() => setRadialHoverId(slot.chip.id)}
-                    onMouseLeave={() => setRadialHoverId((v) => (v === slot.chip.id ? null : v))}
-                    onClick={() => openTemplateFromRadial(slot.chip)}
-                  />
-                );
-              })}
-            </svg>
-            {radialSlots.map((slot) => {
-              const [a1, a2] = radialWedgeAngles(slot.seg, slot.segCount);
-              const mid = (a1 + a2) / 2;
-              const rmid = (radialBandRadius(slot.band) + radialBandRadius(slot.band + 1)) / 2;
-              const ix = RADIAL_CX + rmid * Math.cos((mid * Math.PI) / 180);
-              const iy = RADIAL_CY + rmid * Math.sin((mid * Math.PI) / 180);
-              const isHover = slot.chip.id === radialHoverId;
-              return (
-                <span
-                  key={slot.chip.id}
-                  className={`workspace-radial-icon-btn${isHover ? ' is-hover' : ''}`}
-                  aria-hidden
-                  style={{ left: ix, top: iy }}
-                  title={homeHeroChipLabel(slot.chip.id, t)}
-                >
-                  <Icon name={slot.chip.icon} size={17} />
-                </span>
-              );
-            })}
-          </div>
-          <button
-            type="button"
-            className="workspace-radial-close"
-            style={{ left: radialMenu.x, top: radialMenu.y }}
-            aria-label={t('common.close')}
-            title={t('common.close')}
-            onMouseDown={(event) => event.stopPropagation()}
-            onClick={() => setRadialMenu(null)}
-          >
-            <Icon name="plus" size={16} />
-          </button>
-        </div>,
-        document.body,
-      ) : null}
     </header>
   );
 }

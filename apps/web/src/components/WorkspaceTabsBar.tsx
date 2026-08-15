@@ -15,7 +15,7 @@ import {
 } from './workspaceTabsDock';
 import { useT } from '../i18n';
 import { buildPath, navigate, type EntryHomeView, type Route } from '../router';
-import type { Project } from '../types';
+import { createProject } from '../state/projects';
 import { Icon, type IconName } from './Icon';
 import {
   HOME_APPLY_TEMPLATE_EVENT,
@@ -1328,22 +1328,24 @@ export function WorkspaceTabsBar({
 
   function createNewTab() {
     if (onboardingActive) return;
-    const normalized = normalizeTabsState(state);
-    const homeTab = normalized.tabs.find((tab) => tab.kind === 'entry' && tab.view === 'home');
-    if (homeTab) {
-      setState({
-        ...normalized,
-        activeTabId: homeTab.id,
-      });
-      navigate({ kind: 'home', view: 'home' });
-    } else {
-      const tab = createEntryTab('home');
-      setState({
-        tabs: [tab, ...normalized.tabs],
-        activeTabId: tab.id,
-      });
-      navigate({ kind: 'home', view: 'home' });
-    }
+    void (async () => {
+      try {
+        const { project } = await createProject({
+          name: 'Proyek Baru',
+          skillId: null,
+          designSystemId: null,
+        });
+        if (project?.id) {
+          navigate({
+            kind: 'project',
+            projectId: project.id,
+            fileName: null,
+          });
+        }
+      } catch {
+        navigate({ kind: 'home', view: 'home' });
+      }
+    })();
   }
 
   function closeTab(tabId: string) {

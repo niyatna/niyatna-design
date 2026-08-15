@@ -1215,30 +1215,29 @@
   padding-top: 0;
 }
 .workspace-shell .workspace-tab {
-  width: 156px;
+  width: auto;
+  min-width: 120px;
+  max-width: 200px;
   height: 32px;
   min-height: 32px;
-  /* Auto-shrink in the project shell: tabs sit at 156px when there's room and
-     shrink toward --workspace-tab-min-width as more open, keeping the whole row
-     visible without scrolling for as long as possible. flex-grow 0 stops a lone
-     tab from ballooning; only once every tab hits its min do we fall back to the
-     shared strip's horizontal scroll. */
-  min-width: var(--workspace-tab-min-width, 56px);
-  max-width: 168px;
-  flex: 0 1 156px;
-  grid-template-columns: minmax(0, 1fr) 22px;
+  flex: 0 1 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6px 0 10px;
   align-self: center;
-  border-radius: 12px;
+  border-radius: 8px;
   border: 1px solid transparent;
   background: transparent;
+  color: var(--text-muted);
   box-shadow: none;
+  box-sizing: border-box;
+  gap: 6px;
 }
 /* Chrome-style hairline separators between tabs, matching #5517: each tab
    after the first draws a short divider centered in the 2px strip gap before
    it. Dividers touching the active (or hovered / dragging) tab fade out so
-   its pill reads as one uninterrupted shape. A prior pass here removed this
-   to "stay separator-free" — that reading was wrong, not a real product
-   decision; #5517's own tab strip has always drawn this divider. */
+   its pill reads as one uninterrupted shape. */
 .workspace-shell .workspace-tab + .workspace-tab::before {
   content: '';
   display: block;
@@ -1262,55 +1261,42 @@
 .workspace-shell .workspace-tab.is-dragging + .workspace-tab::before {
   opacity: 0;
 }
-/* The pinned Home tab is fixed: it never shrinks with the project tabs and
-   stays stuck to the left edge so it remains fully visible after the rest
-   overflow into horizontal scroll. The opaque tab-bar background keeps scrolled
-   tabs from showing through it. Declared before .is-active so an active Home
-   tab still picks up the active highlight. */
+/* The pinned Home tab is fixed when single tab exists */
 .workspace-shell .workspace-tab.is-pinned {
-  /* Single-icon pill (~half a project tab): the Home button on a project page,
-     or the sidebar toggle on the Home page. */
-  flex: 0 0 78px;
-  width: 78px;
-  min-width: 78px;
-  max-width: 78px;
-  grid-template-columns: minmax(0, 1fr);
+  flex: 0 0 38px;
+  width: 38px;
+  min-width: 38px;
+  max-width: 38px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   position: sticky;
   left: 0;
   z-index: 3;
+  border-radius: 8px;
   background: var(--workspace-tab-bar-bg);
 }
-/* Active Home tab now shows only the sidebar toggle (no icon + divider), so it
-   is a single centered column. */
 .workspace-shell .workspace-tab.is-pinned:has(.workspace-tab__rail-toggle) {
-  display: grid;
+  display: inline-flex;
   align-items: center;
-  grid-template-columns: minmax(0, 1fr);
-  justify-items: center;
+  justify-content: center;
   padding: 0;
 }
 .workspace-shell .workspace-tab.is-pinned .workspace-tab__rail-toggle {
-  /* Fill the whole pinned tab so the hover target is a full tab-sized box
-     (matching the Home button / a normal tab hover) instead of a cramped 20px
-     icon square. The glyph stays centered via the button's own flex centering. */
-  justify-self: stretch;
   width: 100%;
   height: 100%;
-  border-radius: 12px;
+  border-radius: 8px;
 }
 .workspace-shell .workspace-tab.is-active {
-  border-radius: 12px;
-  background: #ffffff;
-  border-color: var(--workspace-active-tab-border);
-  box-shadow:
-    0 1px 2px color-mix(in srgb, var(--text) 6%, transparent),
-    0 0 0 0.5px color-mix(in srgb, var(--bg-panel) 82%, transparent) inset;
+  border-radius: 8px;
+  background: var(--bg-panel, #252528);
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.12));
+  color: var(--text, #fafafa);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
   z-index: 2;
 }
-/* Home view: the pinned tab is just the sidebar toggle — keep it flat (no
-   white "active pill" fill / border / shadow) so it sits like the other tabs
-   on the bar rather than a filled button. Uses the opaque bar fill so scrolled
-   tabs can't bleed through; the toggle's own ghost hover is the affordance. */
+/* Home view: pinned single tab */
 .workspace-shell .workspace-tab.is-pinned.is-active:has(.workspace-tab__rail-toggle) {
   background: var(--workspace-tab-bar-bg);
   border-color: transparent;
@@ -1318,12 +1304,11 @@
 }
 .workspace-shell .workspace-tab:not(.is-active):hover,
 .workspace-shell .workspace-tab:not(.is-active):focus-within {
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--bg-panel) 78%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--text) 8%, transparent);
   border-color: transparent;
-  /* No inset stroke ring on hover — the soft fill alone is the affordance;
-     a whisper of drop shadow keeps the slight lift. */
-  box-shadow: 0 1px 2px color-mix(in srgb, var(--text) 5%, transparent);
+  color: var(--text);
+  box-shadow: none;
 }
 /* The sticky Home tab must stay opaque on hover/focus: the translucent panel
    wash above (color-mix(… 78%, transparent)) would otherwise let horizontally

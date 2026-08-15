@@ -214,62 +214,45 @@
 }
 .workspace-tab {
   position: relative;
-  height: 34px;
-  /* Auto-shrink: tabs sit at their compact natural width when there's room and
-     shrink down toward --workspace-tab-min-width as more tabs open, so the
-     whole row stays visible without scrolling for as long as possible. They
-     never grow past this compact width (flex-grow 0) so a lone project tab doesn't balloon
-     to fill the bar. Only once every tab has hit its min width does the strip
-     fall back to horizontal scroll. */
-  width: 96px;
-  flex: 0 1 96px;
-  min-width: var(--workspace-tab-min-width, 56px);
-  max-width: 96px;
-  padding: 0;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 22px;
+  height: 32px;
+  width: auto;
+  min-width: 120px;
+  max-width: 200px;
+  flex: 0 1 auto;
+  padding: 0 6px 0 10px;
+  display: inline-flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 6px;
   border: 1px solid transparent;
-  border-bottom-color: transparent;
-  border-radius: var(--radius-large, 8px) 9px 0 0;
+  border-radius: 8px;
   background: transparent;
   color: var(--text-muted);
   overflow: visible;
-  contain: layout style;
-  transition-property: background, border-color, color, opacity, transform, box-shadow;
-  transition-duration: 100ms, 100ms, 100ms, 120ms, 150ms, 150ms;
-  /* One easing for every property: entrance.css also declares a .workspace-tab
-     transition shorthand with var(--ease-out), so a diverging list here made
-     the tab's feel depend on stylesheet import order. */
-  transition-timing-function: var(--ease-out);
+  transition: all 120ms var(--ease-out);
   -webkit-app-region: no-drag;
   cursor: default;
   z-index: 1;
-  will-change: transform;
+  box-sizing: border-box;
 }
-/* The pinned Home tab has no close button, so it drops the close column and
-   sits a little narrower than the project tabs. It is fixed: it never shrinks
-   with the others (flex 0 0) and stays stuck to the left edge so it remains
-   visible even after the project tabs overflow into horizontal scroll. The
-   opaque background keeps scrolled tabs from showing through it. */
 .workspace-tab.is-pinned {
-  width: 42px;
-  flex: 0 0 42px;
-  min-width: 42px;
-  max-width: 42px;
-  display: flex;
+  width: 38px;
+  flex: 0 0 38px;
+  min-width: 38px;
+  max-width: 38px;
+  padding: 0;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   position: sticky;
   left: var(--workspace-tabs-edge-inset);
   z-index: 2;
-  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  border-radius: 8px;
 }
 .workspace-tab.is-pinned.is-active {
-  background: var(--bg-panel);
-  border: 1px solid var(--border);
-  border-bottom-color: var(--bg-panel);
-  color: var(--text-strong);
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text);
 }
 .workspace-tab.is-pinned .workspace-tab__label {
   display: none;
@@ -297,26 +280,20 @@
   background: color-mix(in srgb, var(--bg-panel) 84%, var(--bg-subtle));
   border-color: color-mix(in srgb, var(--border-strong) 42%, transparent);
   color: var(--text);
-  /* No translateX nudge here: tabs live-reorder while dragging, so the row
-     itself already shows the result — and a transform on the hovered tab
-     used to shift the very rects the drop hit-testing read, making the
-     before/after edge flip-flop (visible jitter). Reorder motion comes from
-     the FLIP animation in WorkspaceTabsBar instead. */
 }
 .workspace-tab + .workspace-tab::before {
   display: none;
 }
 .workspace-tab:hover {
-  background: color-mix(in srgb, var(--text) 5%, transparent);
+  background: color-mix(in srgb, var(--text) 7%, transparent);
   border-color: transparent;
   color: var(--text);
 }
 .workspace-tab.is-active {
-  background: var(--bg-panel);
-  border-color: color-mix(in srgb, var(--border) 72%, transparent);
-  border-bottom-color: var(--bg-panel);
-  color: var(--text-strong);
-  box-shadow: 0 -1px 0 color-mix(in srgb, #ffffff 68%, transparent) inset;
+  background: var(--bg-panel, #252528);
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.12));
+  color: var(--text, #fafafa);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 .workspace-tab:hover::before,
 .workspace-tab:hover + .workspace-tab::before,
@@ -329,7 +306,7 @@
 .workspace-tab__main {
   min-width: 0;
   height: 100%;
-  padding: 0 5px 0 8px;
+  padding: 0;
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -337,9 +314,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 6px;
+  gap: 8px;
+  flex: 1 1 auto;
   text-align: left;
-  cursor: inherit;
+  cursor: pointer;
+  overflow: hidden;
 }
 .workspace-tab__main:hover:not(:disabled) {
   background: transparent;
@@ -352,7 +331,7 @@
   align-items: center;
   justify-content: center;
   color: currentColor;
-  opacity: 0.74;
+  opacity: 0.85;
   flex: 0 0 auto;
   line-height: 0;
 }
@@ -370,6 +349,7 @@
   font-size: 13px;
   font-weight: 500;
   letter-spacing: 0;
+  color: inherit;
 }
 /* Hairline between the home icon and the sidebar toggle in the pinned pill. */
 .workspace-tab__divider {
@@ -439,26 +419,29 @@
 .workspace-tab__close {
   width: 18px;
   height: 18px;
-  margin-right: 4px;
+  margin-left: 6px;
+  margin-right: 0;
   padding: 0;
   border: 0;
-  border-radius: var(--radius-sm);
+  border-radius: 4px;
   background: transparent;
-  color: var(--text-faint);
+  color: var(--text-muted);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  opacity: 0;
+  opacity: 0.6;
   flex: 0 0 auto;
   cursor: pointer;
+  transition: all 120ms ease;
 }
 .workspace-tab:hover .workspace-tab__close,
 .workspace-tab.is-active .workspace-tab__close {
-  opacity: 1;
+  opacity: 0.8;
 }
 .workspace-tab__close:hover {
-  color: var(--text);
-  background: var(--bg-subtle);
+  opacity: 1;
+  color: var(--text, #fff);
+  background: color-mix(in srgb, var(--text) 15%, transparent);
 }
 .workspace-tabs-actions {
   position: relative;

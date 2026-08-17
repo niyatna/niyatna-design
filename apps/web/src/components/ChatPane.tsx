@@ -1569,8 +1569,28 @@ export function ChatPane({
   // this no longer the last assistant — keep their pill so the error survives.
   const errorCardOwnerId =
     retryAssistant && failedRunErrorEvent ? retryAssistant.id : null;
-  // AMR promotion card payload (disabled per user preference — no Cloud fallback)
-  const amrSwitchPayload = null;
+  // AMR promotion card payload (only when showSwitchCard is true).
+  const amrSwitchPayload: {
+    errorCode: string;
+    projectId: string;
+    projectKind: TrackingProjectKind | null;
+    conversationId: string | null;
+    assistantMessageId: string;
+    runId: string | null;
+  } | null =
+    runFailureUi?.showSwitchCard
+    && failedRunErrorEvent?.code !== 'UPSTREAM_UNAVAILABLE'
+    && retryAssistant
+    && failedRunErrorEvent?.code
+      ? {
+          errorCode: failedRunErrorEvent.code,
+          projectId: projectId ?? '',
+          projectKind: projectKindForTracking,
+          conversationId: activeConversationId,
+          assistantMessageId: retryAssistant.id,
+          runId: retryAssistant.runId ?? null,
+        }
+      : null;
   // A `primaryAction: 'none'` failure (e.g. a hard quota where retrying is
   // futile) contributes no button of its own — it relies on the AMR switch card
   // below. Only claim the actions row when a real control will render, so a

@@ -8518,11 +8518,11 @@ export function ProjectView({
         })
         .join('\n');
       const prompt =
-        'Continue the remaining unfinished tasks from the previous run. ' +
-        'Do not redo completed work. Focus only on these unfinished todos:\n\n' +
+        'Continue and complete the remaining unfinished tasks from the previous run. ' +
+        'Do not repeatedly re-read full files unless necessary; proceed directly to implementing the required edits and changes on the project files. ' +
+        'Focus strictly on these unfinished todos:\n\n' +
         `${remainingList}\n\n` +
-        'Before making changes, inspect the current project files as needed. ' +
-        'Update TodoWrite as you complete each remaining task.';
+        'Update TodoWrite as each remaining task is completed.';
       return handleSend(prompt, [], []);
     },
     [currentConversationActionDisabled, handleSend],

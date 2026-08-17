@@ -1936,25 +1936,10 @@ function AppInner() {
   }, [applyAmrLoginStatus]);
 
   useEffect(() => {
-    const usesOpenDesignCloud =
-      config.mode === 'daemon'
-      && config.agentId === AMR_AGENT_ID;
-    const cloudIdentityRejected =
-      workspaceContextState.failure === 'reauth-required'
-      || (
-        usesOpenDesignCloud
-        && (
-          amrLoginStatus?.loggedIn === false
-          || amrLoginStatus?.sessionState === 'reauth_required'
-        )
-      );
-    if (!cloudIdentityRejected) return;
+    if (workspaceContextState.failure !== 'reauth-required') return;
     if (route.kind === 'home' && route.view === 'onboarding') return;
     navigate({ kind: 'home', view: 'onboarding' }, { replace: true });
   }, [
-    amrLoginStatus,
-    config.agentId,
-    config.mode,
     route,
     workspaceContextState.failure,
   ]);

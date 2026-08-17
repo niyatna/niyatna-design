@@ -172,38 +172,36 @@ describe('resolveRunFailureUi', () => {
       primaryAction: 'retry',
       titleKey: 'chat.runError.title.rateLimited',
       messageKey: 'chat.runError.rateLimitedMessage',
-      showSwitchCard: true,
+      showSwitchCard: false,
     });
     const upstream = resolveRunFailureUi('UPSTREAM_UNAVAILABLE', null, 'claude');
     expect(upstream).toMatchObject({
       primaryAction: 'retry',
       titleKey: 'chat.runError.title.upstreamUnavailable',
       messageKey: 'chat.runError.upstreamUnavailableMessage',
-      showSwitchCard: true,
+      showSwitchCard: false,
     });
-    expect(resolveRunFailureUi('UNAUTHORIZED', null, null).showSwitchCard).toBe(true);
+    expect(resolveRunFailureUi('UNAUTHORIZED', null, null).showSwitchCard).toBe(false);
   });
 
   // #895 follow-up: the daemon's fine-grained failure_detail can refine — and
   // even override — a too-coarse error_code. A hard quota and a transient 429
-  // both arrive as RATE_LIMITED, but retrying a hard quota is futile, so it must
-  // drop Retry (primaryAction 'none') and name a distinct "quota exhausted" type
-  // while still promoting the hosted-AMR switch card.
+  // both arrive as RATE_LIMITED.
   it('overrides a coarse RATE_LIMITED code with hard-quota / workspace-credits detail', () => {
     const hard = resolveRunFailureUi('RATE_LIMITED', 'hard_quota', 'claude');
     expect(hard).toMatchObject({
-      primaryAction: 'none',
+      primaryAction: 'retry',
       titleKey: 'chat.runError.title.quotaExhausted',
       messageKey: 'chat.runError.quotaExhaustedMessage',
       secondaryRetry: false,
-      showSwitchCard: true,
+      showSwitchCard: false,
     });
     const workspace = resolveRunFailureUi('RATE_LIMITED', 'workspace_credits_exhausted', 'claude');
     expect(workspace).toMatchObject({
-      primaryAction: 'none',
+      primaryAction: 'retry',
       titleKey: 'chat.runError.title.quotaExhausted',
       messageKey: 'chat.runError.workspaceCreditsMessage',
-      showSwitchCard: true,
+      showSwitchCard: false,
     });
   });
 
@@ -214,7 +212,7 @@ describe('resolveRunFailureUi', () => {
     expect(transient).toMatchObject({
       primaryAction: 'retry',
       titleKey: 'chat.runError.title.rateLimited',
-      showSwitchCard: true,
+      showSwitchCard: false,
     });
   });
 
@@ -349,7 +347,7 @@ describe('resolveRunFailureUi', () => {
           titleKey: 'chat.runError.title.signInRequired',
           messageKey: 'chat.runError.signInMessage.other',
           secondaryRetry: false,
-          showSwitchCard: true,
+          showSwitchCard: false,
         });
       }
     }

@@ -384,11 +384,11 @@ function switchToAlternative(
   messageKey: RunFailureMessageKey,
 ): RunFailureUi {
   return {
-    primaryAction: 'none',
+    primaryAction: 'retry',
     titleKey,
     messageKey,
     secondaryRetry: false,
-    showSwitchCard: true,
+    showSwitchCard: false,
   };
 }
 

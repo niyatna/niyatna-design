@@ -171,7 +171,8 @@ function collectFailureText(input: RunFailureClassificationInput): string {
 }
 
 function isHardQuotaText(text: string): boolean {
-  return /\b(session limit|usage limit|limit reached|quota|billing (?:hard )?limit|insufficient[ _-]?(?:quota|credit|credits|funds)|exceeded your current quota|out of credits|no payment method|requires more credits|can only afford)\b|DAILY_LIMIT_EXCEEDED|用户额度不足|额度不足|预扣费额度失败/i
+  if (isEmptyOutputText(text)) return false;
+  return /\b(session limit|usage limit|limit reached|\bquota\b|billing (?:hard )?limit|insufficient[ _-]?(?:quota|credit|credits|funds)|exceeded your current quota|out of credits|no payment method|requires more credits|can only afford)\b|DAILY_LIMIT_EXCEEDED|用户额度不足|额度不足|预扣费额度失败/i
     .test(text);
 }
 
@@ -832,6 +833,16 @@ function classifyRunFailureBase(
   }
 
   const serviceFailure = classifyAgentServiceFailure(text);
+  if (isEmptyOutputText(text)) {
+    return classification(
+      'empty_output',
+      'empty_output',
+      inferFailureStageFromEvents(events, 'first_token_wait'),
+      retryableHint ?? true,
+      'retry',
+    );
+  }
+
   if (serviceFailure === 'AGENT_AUTH_REQUIRED' || isAuthDetailText(text)) {
     return classification(
       'auth',
@@ -891,16 +902,6 @@ function classifyRunFailureBase(
       inferFailureStageFromEvents(events, 'first_token_wait'),
       retryable,
       retryable ? 'retry' : 'none',
-    );
-  }
-
-  if (isEmptyOutputText(text)) {
-    return classification(
-      'empty_output',
-      'empty_output',
-      inferFailureStageFromEvents(events, 'first_token_wait'),
-      retryableHint ?? true,
-      'retry',
     );
   }
 

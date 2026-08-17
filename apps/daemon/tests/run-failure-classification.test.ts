@@ -574,6 +574,19 @@ describe('classifyRunFailure', () => {
       retryable: true,
       user_action: 'retry',
     });
+
+    expect(
+      classify(
+        'AGENT_EXECUTION_FAILED',
+        'Agent completed without producing any output. The model or provider may have returned an empty response. Check the agent logs for upstream errors, then try re-authenticating the agent, checking provider limits, or switching models.',
+        [errorEvent('AGENT_EXECUTION_FAILED', 'Agent completed without producing any output. The model or provider may have returned an empty response. Check the agent logs for upstream errors, then try re-authenticating the agent, checking provider limits, or switching models.', true)],
+      ),
+    ).toMatchObject({
+      failure_category: 'empty_output',
+      failure_detail: 'empty_output',
+      retryable: true,
+      user_action: 'retry',
+    });
   });
 
   it('maps signal exits and stall text to timeout', () => {

@@ -276,18 +276,10 @@ const AGENT_FOCUS_REFRESH_THROTTLE_MS = 10_000;
  * rather than "what just happened" keeps it from being re-decided mid-session.
  */
 export function shouldRouteToFirstRunOnboarding(
-  config: AppConfig,
-  pathname: string,
+  _config: AppConfig,
+  _pathname: string,
 ): boolean {
-  if (config.onboardingCompleted === true) return false;
-  if (
-    pathname.startsWith('/projects/')
-    || pathname.startsWith('/collab-demo')
-    || pathname.startsWith('/community')
-  ) {
-    return false;
-  }
-  return true;
+  return false;
 }
 
 function workspaceProjectListViewForRoute(route: Route): WorkspaceProjectListView {

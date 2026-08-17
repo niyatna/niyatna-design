@@ -90,7 +90,7 @@ export const DEFAULT_CONFIG: AppConfig = {
   agentId: null,
   skillId: null,
   designSystemId: null,
-  onboardingCompleted: false,
+  onboardingCompleted: true,
   theme: FORCED_APP_THEME,
   accentColor: DEFAULT_ACCENT_COLOR,
   mediaProviders: {},

@@ -125,6 +125,7 @@ import {
   daemonAgentPayloadToPersistedAgentEvent,
   persistRunEventToAssistantMessage,
   flushRunMessageEvents,
+  finalizeRunMessageEvents,
   persistRunFailureClassification,
   pinAssistantMessageOnRunCreate,
 } from './runtimes/chat-run-messages.js';
@@ -9719,7 +9720,7 @@ export async function startServer({
       run.clientRequestId = clientRequestId;
     if (typeof agentId === 'string' && agentId) run.agentId = agentId;
     const finishRun = (status, code = null, signal = null) => {
-      flushRunMessageEvents(run);
+      finalizeRunMessageEvents(db, run);
       return design.runs.finish(run, status, code, signal);
     };
     // Freeze the billing address once, before the first asynchronous setup

@@ -15,6 +15,7 @@ import {
 } from './workspaceTabsDock';
 import { useT } from '../i18n';
 import { buildPath, navigate, type EntryHomeView, type Route } from '../router';
+import type { Project } from '../types';
 import { createProject } from '../state/projects';
 import { Icon, type IconName } from './Icon';
 import {

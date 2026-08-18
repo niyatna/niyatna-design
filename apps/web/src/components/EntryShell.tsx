@@ -1570,7 +1570,7 @@ export function EntryShell({
   // carries a redundant one.
 
 
-  if (view === 'onboarding') {
+  if (view === 'onboarding' && typeof window !== 'undefined' && window.location.search.includes('onboarding=force')) {
     return (
       <div className="entry-shell entry-shell--no-header entry-shell--onboarding">
         <main className="entry-onboarding-modal" aria-label={t('settings.welcomeTitle')}>

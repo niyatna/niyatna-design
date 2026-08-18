@@ -76,7 +76,7 @@ export function parseRoute(pathname: string): Route {
   const parts = pathname.replace(/\/+$/, '').split('/').filter(Boolean);
   if (parts.length === 0) return { kind: 'home', view: 'home' };
   if (parts[0] === 'onboarding') {
-    return { kind: 'home', view: 'onboarding' };
+    return { kind: 'home', view: 'home' };
   }
   if (parts[0] === 'projects') {
     if (parts[1]) {

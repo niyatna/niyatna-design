@@ -7,7 +7,7 @@ import '../src/index.css';
 import '../src/styles/home/index.css';
 
 export const metadata: Metadata = {
-  title: 'Open Design',
+  title: 'OpenDesign',
   icons: {
     icon: '/app-icon.png',
     apple: '/app-icon.png',
@@ -21,6 +21,7 @@ export const viewport: Viewport = {
 /**
  * Inline script that runs before React hydrates so the first paint already
  * carries the app's appearance — no flash of unstyled content.
+ * Default theme is pinned to dark for Niyatna Open Design.
  */
 const themeInitScript = `(function(){document.documentElement.setAttribute('data-theme','dark');try{var c=JSON.parse(localStorage.getItem('open-design:config')||'{}');var a=typeof c.accentColor==='string'&&/^#[0-9a-fA-F]{6}$/.test(c.accentColor.trim())?c.accentColor.trim().toLowerCase():'#353535';if(c.configMigrationVersion!==3&&(a==='#87ea5c'||a==='#c96442'))a='#353535';var s=document.documentElement.style;s.setProperty('--accent',a);s.setProperty('--accent-strong','color-mix(in srgb, '+a+' 82%, var(--text-strong))');s.setProperty('--accent-soft','color-mix(in srgb, '+a+' 12%, var(--bg-subtle))');s.setProperty('--accent-tint','color-mix(in srgb, '+a+' 6%, var(--bg-panel))');s.setProperty('--accent-hover','color-mix(in srgb, '+a+' 86%, var(--text-strong))');}catch(e){}})();`;
 

@@ -34,6 +34,22 @@ test('[P2] captures the project workspace surface', async ({ page }) => {
   await captureVisual(page, 'visual-project-workspace');
 });
 
+test('[P1] keeps the project account action host anchored to the right edge', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await configureVisualPage(page);
+  await gotoVisualHome(page);
+  await gotoVisualWorkspace(page);
+
+  const accountActionsRect = await page
+    .getByTestId('workspace-chrome-account-actions')
+    .evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      return { left: rect.left, right: rect.right };
+    });
+  expect(accountActionsRect.left).toBeGreaterThan(1000);
+  expect(1280 - accountActionsRect.right).toBeLessThanOrEqual(24);
+});
+
 test('[P2] captures the workspace staged contexts surface', async ({ page }) => {
   await configureVisualPage(page);
   await gotoVisualHome(page);
@@ -119,7 +135,7 @@ test('[P2] captures the topbar execution switcher surface', async ({ page }) => 
   );
 });
 
-test('[P1] captures the topbar Open Design model picker with no account surface', async ({ page }) => {
+test('[P1] captures the topbar OpenDesign model picker with no account surface', async ({ page }) => {
   test.setTimeout(60_000);
 
   await configureVisualPage(page, {
@@ -147,7 +163,7 @@ test('[P1] captures the topbar Open Design model picker with no account surface'
   const popover = page.getByTestId('inline-model-switcher-popover');
   await expect(popover).toBeVisible();
   // InlineModelSwitcher refetches the AMR status whenever the popover opens
-  // with Open Design installed, so a landed response proves the signed-in
+  // with OpenDesign installed, so a landed response proves the signed-in
   // render happened.
   await expect.poll(() => velaStatusRequests).toBeGreaterThan(requestsBeforeOpen);
 
@@ -157,7 +173,7 @@ test('[P1] captures the topbar Open Design model picker with no account surface'
   // 升级 entry all belong to the non-compact shape that the top bar stopped
   // mounting — account and billing surfaces live in the nav rail and Settings
   // now. Coverage did not disappear with the assertions: the live plan/balance/
-  // upgrade card is captured by visual-settings.test.ts's "settings Open Design
+  // upgrade card is captured by visual-settings.test.ts's "settings OpenDesign
   // account balance" case in this same lane, and the `inline_amr_upgrade`
   // attribution URL by apps/web/tests/components/InlineModelSwitcher.test.tsx
   // ("routes inline upgrades through the signed-in AMR profile").
@@ -288,7 +304,7 @@ test('[P2] captures the avatar menu surface', async ({ page }) => {
   await captureVisualTarget(page, 'visual-avatar-menu-panel', menu);
 });
 
-test('[P1] Avatar menu stays a model picker for a signed-in Open Design account', async ({ page }) => {
+test('[P1] Avatar menu stays a model picker for a signed-in OpenDesign account', async ({ page }) => {
   test.setTimeout(60_000);
 
   await configureVisualPage(page, {
@@ -314,17 +330,17 @@ test('[P1] Avatar menu stays a model picker for a signed-in Open Design account'
 
   const requestsBeforeOpen = velaStatusRequests;
   const menu = await prepareVisualAvatarMenu(page);
-  // AvatarMenu refetches the login status on open whenever Open Design is
+  // AvatarMenu refetches the login status on open whenever OpenDesign is
   // installed, so a landed response means the signed-in render has happened.
   await expect.poll(() => velaStatusRequests).toBeGreaterThan(requestsBeforeOpen);
 
-  // 4e3161751 (#6156) deleted the Open Design account row from this popover —
+  // 4e3161751 (#6156) deleted the OpenDesign account row from this popover —
   // plan badge, balance, wallet fallback, upgrade/console links — and retired
   // the nine Vitest suites that asserted it, recasting the survivor as
   // apps/web/tests/components/AvatarMenu.test.tsx's "never renders the account
   // row, plan badge or balance in the popover". This is that invariant at the
   // rendered-app layer. The signed-in account surface itself is captured by
-  // visual-settings.test.ts's "settings Open Design account balance" case, and
+  // visual-settings.test.ts's "settings OpenDesign account balance" case, and
   // the `avatar_amr_upgrade` deep link — now reachable only by clicking a
   // plan-gated model row, which needs workspace billing permission this lane
   // does not fixture — by that same Vitest file's "routes a locked model only
@@ -332,7 +348,7 @@ test('[P1] Avatar menu stays a model picker for a signed-in Open Design account'
   await expect(menu.locator('[data-testid^="avatar-agent-option-"]')).toHaveCount(0);
   await expect(menu.locator('.avatar-amr-row')).toHaveCount(0);
   await expect(menu).not.toContainText('$247.51');
-  // What it does render for a signed-in Open Design runtime: that runtime's
+  // What it does render for a signed-in OpenDesign runtime: that runtime's
   // model catalog, with the configured model marked active.
   const modelList = menu.getByTestId('avatar-model-list');
   await expect(modelList).toBeVisible();

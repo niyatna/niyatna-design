@@ -26,6 +26,7 @@ import { runGuardChecks, type GuardCheck, type GuardContext } from "./lib/guard/
 
 const repoRoot = path.resolve(import.meta.dirname, "..");
 const allowedE2eScripts = new Set([
+  "e2e/scripts/artifact-render-parity.ts",
   "e2e/scripts/playwright.ts",
   "e2e/scripts/release-smoke.ts",
   "e2e/scripts/visual-report.ts",

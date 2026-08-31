@@ -104,16 +104,8 @@ export const DEFAULT_CONFIG: AppConfig = {
   projectLocations: [],
   defaultProjectLocationId: 'default',
   allowSilentUpdates: false,
-  // Telemetry defaults to ON so fresh-install users emit onboarding /
-  // ui_click events from the first frame. The disclosure modal still
-  // appears after `onboardingCompleted` flips, and Settings → Privacy
-  // remains the one-click opt-out. Without these defaults the gate at
-  // `daemon/src/analytics.ts` (`if (telemetry?.metrics !== true) return`)
-  // dropped every event fired during onboarding because no consent
-  // existed yet — observed live on the prerelease.10 QA run, which left
-  // zero `page_view pn=onboarding` rows on PostHog despite the user
-  // completing the flow.
-  telemetry: { metrics: true, content: true },
+  privacyDecisionAt: 1,
+  telemetry: { metrics: false, content: false },
 };
 
 /** Well-known providers with pre-filled base URLs. */
@@ -1001,8 +993,6 @@ export async function syncComposioConfigToDaemon(
 // silently sitting in browser storage where the user can't see it.
 const DAEMON_OWNED_KEYS = new Set<keyof AppConfig>([
   'installationId',
-  'telemetry',
-  'privacyDecisionAt',
   'allowSilentUpdates',
 ]);
 

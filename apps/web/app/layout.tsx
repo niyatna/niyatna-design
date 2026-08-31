@@ -5,9 +5,11 @@ import { AnalyticsProvider } from '../src/analytics/provider';
 import '@excalidraw/excalidraw/index.css';
 import '../src/index.css';
 import '../src/styles/home/index.css';
+import '../src/styles/liquid-glass.css';
+import { LiquidGlassFilter } from '../src/components/LiquidGlass';
 
 export const metadata: Metadata = {
-  title: 'OpenDesign',
+  title: 'Niyatna Design',
   icons: {
     icon: '/app-icon.png',
     apple: '/app-icon.png',
@@ -34,6 +36,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body suppressHydrationWarning>
+        <LiquidGlassFilter />
         <I18nProvider>
           <AnalyticsProvider>{children}</AnalyticsProvider>
         </I18nProvider>

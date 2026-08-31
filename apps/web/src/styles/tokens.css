@@ -3,40 +3,40 @@
    ============================================================ */
 :root {
   color-scheme: dark;
-  --bg: #202020;
-  --bg-app: #202020;
-  --bg-panel: #353535;
-  --bg-subtle: #494949;
-  --bg-muted: #5c5c5c;
-  --bg-fill-tertiary: rgba(255, 255, 255, 0.06);
-  --bg-fill-secondary: rgba(255, 255, 255, 0.10);
-  --bg-fill: rgba(255, 255, 255, 0.16);
-  --bg-elevated: #353535;
-  --glass-regular: rgba(53, 53, 53, 0.66);
-  --glass-regular-blur: 28px;
-  --glass-edge-highlight: color-mix(in srgb, #fff 14%, transparent);
+  --bg: #0b0c10;
+  --bg-app: #0b0c10;
+  --bg-panel: #13141c;
+  --bg-subtle: #1a1b26;
+  --bg-muted: #242634;
+  --bg-fill-tertiary: rgba(255, 255, 255, 0.04);
+  --bg-fill-secondary: rgba(255, 255, 255, 0.08);
+  --bg-fill: rgba(255, 255, 255, 0.14);
+  --bg-elevated: #181924;
+  --glass-regular: rgba(19, 20, 28, 0.75);
+  --glass-regular-blur: 24px;
+  --glass-edge-highlight: rgba(255, 255, 255, 0.14);
   --entry-ground: var(--bg);
-  --border: #5c5c5c;
-  --border-strong: #848484;
-  --border-selected: #a3a3a3;
-  --border-soft: #494949;
+  --border: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --border-selected: rgba(255, 255, 255, 0.3);
+  --border-soft: rgba(255, 255, 255, 0.05);
 
-  --text: #ededed;
-  --text-strong: #fafafa;
-  --text-muted: #bdbdbd;
-  --text-soft: #848484;
-  --text-faint: #5c5c5c;
+  --text: #e2e4e9;
+  --text-strong: #ffffff;
+  --text-muted: #9499ad;
+  --text-soft: #6c7287;
+  --text-faint: #474b5c;
 
-  --accent: #ededed;
-  --accent-contrast: #202020;
-  --accent-strong: #fafafa;
-  --accent-soft: #494949;
-  --accent-tint: #353535;
-  --accent-hover: #fafafa;
-  --brand: #87ea5c;
-  --brand-weak: #2f781d;
-  --brand-soft: #164111;
-  --brand-text: #adf788;
+  --accent: #f4f4f6;
+  --accent-contrast: #0b0c10;
+  --accent-strong: #ffffff;
+  --accent-soft: #242634;
+  --accent-tint: #181924;
+  --accent-hover: #ffffff;
+  --brand: #6366f1;
+  --brand-weak: #3730a3;
+  --brand-soft: #1e1b4b;
+  --brand-text: #a5b4fc;
 
   /* Semantic accent tints used by tool / status pills. */
   --green: #3BBF7D;

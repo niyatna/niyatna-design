@@ -1,0 +1,101 @@
+/* ==========================================================================
+   Liquid Glass - 21st.dev / Suraj-xd inspired styling for Niyatna Design
+   ========================================================================== */
+
+.liquid-glass-wrapper {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.25rem;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow:
+    0 10px 30px -10px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.liquid-glass-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: rgba(15, 15, 20, 0.65);
+}
+
+[data-theme='light'] .liquid-glass-backdrop {
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.liquid-glass-tint {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.02) 40%,
+    rgba(0, 0, 0, 0.15) 100%
+  );
+}
+
+.liquid-glass-border-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.4),
+    inset 1px 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset -1px 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Variants */
+.liquid-glass--dock {
+  border-radius: 2rem;
+  padding: 0.5rem 0.75rem;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.liquid-glass--dock:hover {
+  box-shadow:
+    0 20px 40px -15px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.16);
+}
+
+.liquid-glass--pill {
+  border-radius: 9999px;
+  padding: 0.35rem 0.85rem;
+}
+
+.liquid-glass--button {
+  cursor: pointer;
+  border-radius: 1rem;
+  padding: 0.6rem 1.25rem;
+}
+
+.liquid-glass--button:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 12px 25px -8px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.22);
+}
+
+.liquid-glass--button:active {
+  transform: scale(0.98);
+}
+
+.liquid-glass--card {
+  border-radius: 1.25rem;
+  padding: 1.25rem;
+}
+
+.liquid-glass--subtle {
+  border-radius: 0.875rem;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+}

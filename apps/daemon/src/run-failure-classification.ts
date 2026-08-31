@@ -963,8 +963,6 @@ function classifyRunFailureBase(
     );
   }
 
-<<<<<<< HEAD
-=======
   // Prefer the structured rpc_close_reason=empty_output signal over text
   // heuristics — but only after RATE_LIMITED, UPSTREAM_UNAVAILABLE, and other
   // structured-code branches above have had a chance to claim the run. A child
@@ -990,8 +988,6 @@ function classifyRunFailureBase(
       'retry',
     );
   }
-
->>>>>>> upstream/main
   if (isTimeoutText(text) || errorCode === 'TIMEOUT') {
     const retryable = retryableHint ?? true;
     const inactivityTimeout = /inactivity|stalled|hung|no new output|without emitting any new output/i.test(text);

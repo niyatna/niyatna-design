@@ -35,8 +35,8 @@ import { processWebSourcemaps } from "./web-sourcemaps.js";
 
 const execFileAsync = promisify(execFile);
 
-const PRODUCT_NAME = "Open Design";
-const APP_IMAGE_PRODUCT_NAME = "Open-Design";
+const PRODUCT_NAME = "Niyatna Design";
+const APP_IMAGE_PRODUCT_NAME = "Niyatna-Design";
 const DESKTOP_LOG_ECHO_ENV = "OD_DESKTOP_LOG_ECHO";
 // The containerized build sets this to the standalone pnpm binary fetched by
 // buildDockerArgs; runProductionInstall reads it to avoid invoking `npm` inside
@@ -619,14 +619,22 @@ async function writeLinuxAppImageAppRun(paths: LinuxPaths): Promise<void> {
 // --- Step 5: writeLinuxBuilderConfig helper ---
 
 async function writeLinuxBuilderConfig(config: ToolPackConfig, paths: LinuxPaths): Promise<void> {
-  const target = config.to === "dir" ? ["dir"] : ["AppImage"];
+  const productName = config.productName ?? PRODUCT_NAME;
+  const target =
+    config.to === "dir"
+      ? ["dir"]
+      : config.to === "deb"
+      ? ["deb"]
+      : config.to === "appimage"
+      ? ["AppImage"]
+      : ["AppImage", "deb"];
   const namespaceToken = sanitizeNamespace(config.namespace);
   const packagedVersion = await readPackagedVersion(config);
   const packageVersion = electronBuilderVersionForAppVersion(packagedVersion);
 
   const builderConfig: Record<string, unknown> = {
-    appId: "io.open-design.desktop",
-    artifactName: `${PRODUCT_NAME}-${namespaceToken}.\${ext}`,
+    appId: "com.niyatna.design",
+    artifactName: `${productName}-${namespaceToken}.\${ext}`,
     asar: false,
     buildDependenciesFromSource: false,
     compression: "maximum",
@@ -639,11 +647,11 @@ async function writeLinuxBuilderConfig(config: ToolPackConfig, paths: LinuxPaths
     // See tools/pack/src/win/builder.ts: rely on electron-builder's own
     // Electron download rather than node_modules' dist, which pnpm does not
     // reliably materialize on CI runners.
-    executableName: PRODUCT_NAME,
+    executableName: "niyatna-design",
     extraMetadata: {
       main: "./main.cjs",
-      name: "open-design-packaged-app",
-      productName: PRODUCT_NAME,
+      name: "niyatna-design",
+      productName: productName,
       version: packageVersion,
       ...(config.portable ? {} : { odToolsPackRuntimeRoot: config.roots.runtime.namespaceBaseRoot }),
     },
@@ -670,8 +678,13 @@ async function writeLinuxBuilderConfig(config: ToolPackConfig, paths: LinuxPaths
       target,
       icon: linuxResources.icon,
       category: "Development",
-      synopsis: "Open Design",
-      maintainer: "Open Design Contributors",
+      synopsis: "Niyatna Design - Local-first AI design studio",
+      maintainer: "Niyatna <support@niyatna.com>",
+    },
+    deb: {
+      packageCategory: "devel",
+      priority: "optional",
+      synopsis: "Niyatna Design - Local-first AI design studio",
     },
     // Keep the AppImage launch fallback explicit. Our top-level AppRun wrapper
     // clears ELECTRON_RUN_AS_NODE before these Chromium flags reach Electron,
@@ -681,7 +694,7 @@ async function writeLinuxBuilderConfig(config: ToolPackConfig, paths: LinuxPaths
     },
     nodeGypRebuild: false,
     npmRebuild: false,
-    productName: PRODUCT_NAME,
+    productName: productName,
   };
 
   await mkdir(dirname(paths.appBuilderConfigPath), { recursive: true });

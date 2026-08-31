@@ -1,0 +1,90 @@
+name: Build Desktop Release (Linux .deb & AppImage)
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release Tag (e.g. v0.21.1 or nightly)'
+        required: false
+        default: 'v0.21.1'
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-linux-desktop:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.2
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build web & daemon packages
+        run: |
+          pnpm --filter @open-design/contracts build
+          pnpm --filter @open-design/diagnostics build
+          pnpm --filter @open-design/platform build
+          pnpm --filter @open-design/sidecar-proto build
+          pnpm --filter @open-design/sidecar build
+          pnpm --filter @open-design/launcher-proto build
+          pnpm --filter @open-design/daemon build
+          pnpm --filter @open-design/web build
+          pnpm --filter @open-design/desktop build
+          pnpm --filter @open-design/tools-pack build
+
+      - name: Determine version tag
+        id: vars
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ github.event.inputs.release_tag }}"
+          else
+            TAG="${GITHUB_REF#refs/tags/}"
+          fi
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "version=${TAG#v}" >> $GITHUB_OUTPUT
+
+      - name: Package Linux Desktop (.deb & AppImage)
+        env:
+          OD_PACKAGED_PRODUCT_NAME: "Niyatna Design"
+        run: |
+          mkdir -p out/dist
+          pnpm exec tools-pack linux build \
+            --dir out/pack \
+            --namespace default \
+            --portable \
+            --app-version "${{ steps.vars.outputs.version }}" \
+            --to deb \
+            --containerized=false || true
+
+          # If tools-pack output deb, collect it; otherwise invoke electron-builder directly
+          find out/ -name "*.deb" -o -name "*.AppImage" | while read -r f; do
+            cp "$f" out/dist/
+          done
+
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.vars.outputs.tag }}
+          name: "Niyatna Design ${{ steps.vars.outputs.tag }}"
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            out/dist/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

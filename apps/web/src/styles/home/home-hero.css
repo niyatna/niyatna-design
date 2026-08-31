@@ -517,23 +517,26 @@
   z-index: 2;
   width: 100%;
   max-width: 720px;
-  /* Inner prompt surface stays white; the outer composer card provides the
-     subtle selected-gray grouping. */
-  background: var(--bg-app);
-  /* Stroke only appears once the user engages the field (focus-within
-     below); idle state stays borderless. */
-  border: var(--stroke-thin) solid transparent;
-  /* Concentric with the outer composer card (20px) minus its 4px inset. */
-  border-radius: 16px;
-  box-shadow: none;
-  padding: var(--spacing-8);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.02) 40%,
+    rgba(14, 15, 22, 0.75) 100%
+  );
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  backdrop-filter: blur(24px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 1.5rem;
+  box-shadow:
+    0 20px 48px -12px rgba(0, 0, 0, 0.7),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  padding: 14px 16px 10px;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-8);
+  gap: 10px;
   margin-top: 0;
-  transition:
-    border-color var(--duration-faster) var(--curve-easy-ease),
-    box-shadow var(--duration-faster) var(--curve-easy-ease);
+  transition: all 240ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 /* While one of the composer's popovers is open, the whole card (a stacking
    context) is lifted so the popover escapes above the static home content

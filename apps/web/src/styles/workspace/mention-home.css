@@ -326,16 +326,27 @@
   z-index: 10000;
 }
 .modal {
-  background: var(--bg-elevated);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.02) 40%,
+    rgba(16, 17, 24, 0.88) 100%
+  );
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   -webkit-app-region: no-drag;
-  border-radius: var(--radius-lg);
-  padding: 22px;
+  border-radius: 1.25rem;
+  padding: 24px;
   width: 520px;
   max-width: calc(100vw - 32px);
   display: flex;
   flex-direction: column;
   gap: 12px;
-  box-shadow: var(--shadow-lg);
+  box-shadow:
+    0 24px 60px -12px rgba(0, 0, 0, 0.75),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
   animation: pop-in 220ms cubic-bezier(0.21, 1.02, 0.73, 1);
 }
 .modal h2 { margin: 0; font-size: 18px; letter-spacing: -0.01em; font-weight: 600; }
@@ -713,18 +724,25 @@
 .modal-settings {
   --modal-padding: 24px;
   width: min(920px, calc(100vw - 48px));
-  /* Fixed height regardless of which section is active — short sections
-     pad out with empty space inside `.settings-content`, long sections
-     scroll internally. Keeps the dialog from jumping in size as the user
-     switches sidebar items. */
   height: min(720px, calc(100vh - 64px));
   padding: 0;
   gap: 0;
   overflow: hidden;
-  /* Anchor for the absolutely-positioned `.settings-chrome` strip. Without
-     this the close/fullscreen controls would escape to the viewport on
-     long-scrolling sections. */
   position: relative;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.07) 0%,
+    rgba(255, 255, 255, 0.01) 40%,
+    rgba(14, 15, 22, 0.9) 100%
+  );
+  -webkit-backdrop-filter: blur(32px) saturate(190%);
+  backdrop-filter: blur(32px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.5rem;
+  box-shadow:
+    0 32px 80px -16px rgba(0, 0, 0, 0.85),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.25),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 .modal-settings.settings-fullscreen {
   width: calc(100vw - 24px);

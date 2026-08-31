@@ -175,29 +175,40 @@
   height: 100%;
   min-width: 0;
   padding: var(--spacing-8);
-  border: 0;
-  border-radius: inherit;
-  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 1rem;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.01) 40%,
+    rgba(16, 17, 24, 0.6) 100%
+  );
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  backdrop-filter: blur(16px) saturate(180%);
+  box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.45), inset 0 1px 1px 0 rgba(255, 255, 255, 0.15);
   color: inherit;
   cursor: pointer;
   font: inherit;
   text-align: left;
   overflow: hidden;
+  transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 .recent-projects__row--grid .recent-projects__card-main {
   align-items: stretch;
   justify-content: flex-start;
   height: auto;
-  min-height: 0;
-  /* No inner fill: the thumbnail spans the full card width and the 32px grid
-     gap is the only spacing between cards. */
-  padding: 0;
 }
 .recent-projects__card-main:hover:not(:disabled),
 .recent-projects__card-main:active:not(:disabled) {
-  background: transparent;
-  border-color: transparent;
-  transform: none;
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.65), inset 0 1px 1px 0 rgba(255, 255, 255, 0.25);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.09) 0%,
+    rgba(255, 255, 255, 0.02) 40%,
+    rgba(20, 21, 30, 0.75) 100%
+  );
 }
 .recent-projects__card:hover {
   border-color: transparent;

@@ -24,7 +24,12 @@ on:
         type: boolean
         default: false
   push:
-    tags: ['v*.*.*']
+    branches:
+      - main
+    tags:
+      - 'v*.*.*'
+  schedule:
+    - cron: '0 0 * * *'
   pull_request:
     paths:
       - "deploy/**"
@@ -34,6 +39,12 @@ on:
       - "pnpm-workspace.yaml"
       - ".github/workflows/docker-image.yml"
   workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publish Docker image to GHCR"
+        required: false
+        type: boolean
+        default: true
 
 jobs:
   build-and-push:
@@ -53,22 +64,16 @@ jobs:
         shell: bash
         env:
           EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
           RELEASE_VERSION: ${{ inputs.release_version }}
           PUBLISH_LATEST: ${{ inputs.publish_latest }}
+          INPUT_PUBLISH: ${{ inputs.publish }}
         run: |
           set -euo pipefail
-          # Publish on:
-          #   - tag push (event_name=push with tags filter), or
-          #   - reusable release call that passes release_version / publish_latest.
-          # Do NOT key on event_name == 'workflow_call': nested reusable workflows
-          # keep the *caller's* event name (usually workflow_dispatch), so that
-          # check never matches and stable GHCR publish would silently become a
-          # smoke-only build.
-          if [ "$EVENT_NAME" = "push" ] || [ -n "${RELEASE_VERSION:-}" ] || [ "${PUBLISH_LATEST:-}" = "true" ]; then
+          if [ "$EVENT_NAME" = "push" ] || [ "$EVENT_NAME" = "schedule" ] || [ "${INPUT_PUBLISH:-true}" = "true" ] || [ -n "${RELEASE_VERSION:-}" ] || [ "${PUBLISH_LATEST:-}" = "true" ]; then
             echo "publish=true" >> "$GITHUB_OUTPUT"
             echo "platforms=linux/amd64,linux/arm64" >> "$GITHUB_OUTPUT"
           else
-            # pull_request and standalone workflow_dispatch: smoke only
             echo "publish=false" >> "$GITHUB_OUTPUT"
             echo "platforms=linux/amd64" >> "$GITHUB_OUTPUT"
           fi
@@ -95,17 +100,11 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ github.repository_owner }}/od
-          # spec §15.1 tag scheme:
-          #   - vX.Y.Z push             → :X.Y.Z + :latest
-          #   - workflow_call (stable)  → :<release_version> + optional :latest
-          #   - PR / manual validate    → local-only sha tags (only when not publishing)
           tags: |
+            type=raw,value=latest,enable=${{ steps.mode.outputs.publish == 'true' }}
+            type=sha,prefix=sha-,format=short,enable=${{ steps.mode.outputs.publish == 'true' }}
             type=semver,pattern={{version}}
             type=raw,value=${{ inputs.release_version }},enable=${{ inputs.release_version != '' }}
-            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') }}
-            type=raw,value=latest,enable=${{ inputs.publish_latest == true }}
-            type=sha,prefix=pr-${{ github.event.pull_request.number }}-sha-,format=short,enable=${{ steps.mode.outputs.publish != 'true' && github.event_name == 'pull_request' }}
-            type=sha,prefix=manual-sha-,format=short,enable=${{ steps.mode.outputs.publish != 'true' && github.event_name == 'workflow_dispatch' }}
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
 

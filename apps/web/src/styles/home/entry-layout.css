@@ -109,17 +109,21 @@
   /* White frost: pure-white base at 65% alpha, so the card reads white but
      keeps the frosted-glass translucency (the panel's material-thin backdrop
      blur below does the frosting). */
-  --rail-surface: rgba(36, 36, 36, 0.85);
-  background: var(--rail-surface);
-  -webkit-backdrop-filter: var(--material-thin-backdrop);
-  backdrop-filter: var(--material-thin-backdrop);
-  /* The stroke is the gradient ring painted by ::after below — the real
-     border stays transparent so the box metrics don't change. */
-  border: 1px solid transparent;
-  border-radius: var(--radius-lg);
-  /* Whisper elevation: the floating panel only needs a hairline lift — the
-     md shadow read as a wide gray halo on the light ground. */
-  box-shadow: var(--shadow-sm);
+  --rail-surface: rgba(18, 19, 26, 0.75);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    rgba(255, 255, 255, 0.01) 40%,
+    rgba(14, 15, 22, 0.8) 100%
+  );
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.25rem;
+  box-shadow:
+    0 20px 40px -15px rgba(0, 0, 0, 0.6),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 /* Gradient rim, Craft-style: a light edge that is brightest along the top
    and fades down the sides (glass-refract ring tokens, so dark mode halves

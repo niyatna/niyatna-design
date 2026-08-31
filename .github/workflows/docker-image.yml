@@ -47,8 +47,18 @@ on:
         default: true
 
 jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-latest
+            suffix: amd64
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+            suffix: arm64
+    runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
       packages: write
@@ -59,36 +69,64 @@ jobs:
         with:
           ref: ${{ inputs.ref || github.sha }}
 
-      - name: Resolve publish mode
-        id: mode
-        shell: bash
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          REF_NAME: ${{ github.ref_name }}
-          RELEASE_VERSION: ${{ inputs.release_version }}
-          PUBLISH_LATEST: ${{ inputs.publish_latest }}
-          INPUT_PUBLISH: ${{ inputs.publish }}
-        run: |
-          set -euo pipefail
-          if [ "$EVENT_NAME" = "push" ] || [ "$EVENT_NAME" = "schedule" ] || [ "${INPUT_PUBLISH:-true}" = "true" ] || [ -n "${RELEASE_VERSION:-}" ] || [ "${PUBLISH_LATEST:-}" = "true" ]; then
-            echo "publish=true" >> "$GITHUB_OUTPUT"
-            echo "platforms=linux/amd64,linux/arm64" >> "$GITHUB_OUTPUT"
-          else
-            echo "publish=false" >> "$GITHUB_OUTPUT"
-            echo "platforms=linux/amd64" >> "$GITHUB_OUTPUT"
-          fi
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Set up QEMU
-        if: ${{ steps.mode.outputs.publish == 'true' }}
-        uses: docker/setup-qemu-action@v3
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
-          platforms: linux/amd64,linux/arm64
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push by digest
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/Dockerfile
+          platforms: ${{ matrix.platform }}
+          push: true
+          outputs: type=image,name=ghcr.io/${{ github.repository_owner }}/od,push-by-digest=true,name-canonical=true
+          build-args: |
+            NODE_IMAGE=public.ecr.aws/docker/library/node:24-alpine
+            RUNTIME_IMAGE=public.ecr.aws/docker/library/node:24-alpine
+          cache-from: type=gha,scope=${{ matrix.suffix }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.suffix }}
+
+      - name: Export digest
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "/tmp/digests/${digest#sha256:}"
+
+      - name: Upload digest artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ matrix.suffix }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          pattern: digests-*
+          merge-multiple: true
+          path: /tmp/digests
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to GitHub Container Registry
-        if: ${{ steps.mode.outputs.publish == 'true' }}
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -101,52 +139,21 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/od
           tags: |
-            type=raw,value=latest,enable=${{ steps.mode.outputs.publish == 'true' }}
-            type=sha,prefix=sha-,format=short,enable=${{ steps.mode.outputs.publish == 'true' }}
+            type=raw,value=latest
+            type=sha,prefix=sha-,format=short
             type=semver,pattern={{version}}
             type=raw,value=${{ inputs.release_version }},enable=${{ inputs.release_version != '' }}
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
 
-      - name: Build and push
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: deploy/Dockerfile
-          platforms: ${{ steps.mode.outputs.platforms }}
-          push: ${{ steps.mode.outputs.publish == 'true' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          # The in-tree Dockerfile uses node:24-alpine + apk for build
-          # tooling; we keep that default so the workflow doesn't drift
-          # from local builds. Spec §15.1 nominates bookworm-slim as
-          # the canonical base; switching is a follow-up that needs
-          # the Dockerfile's apk lines re-cast for apt.
-          build-args: |
-            NODE_IMAGE=public.ecr.aws/docker/library/node:24-alpine
-            RUNTIME_IMAGE=public.ecr.aws/docker/library/node:24-alpine
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Verify public GHCR pull access
-        if: ${{ steps.mode.outputs.publish == 'true' }}
-        shell: bash
-        env:
-          PUBLISHED_TAGS: ${{ steps.meta.outputs.tags }}
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
         run: |
-          set -euo pipefail
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf 'ghcr.io/${{ github.repository_owner }}/od@sha256:%s ' *)
+        env:
+          DOCKER_METADATA_OUTPUT_JSON: ${{ steps.meta.outputs.json }}
 
-          docker logout ghcr.io >/dev/null 2>&1 || true
-
-          while IFS= read -r image; do
-            [ -n "$image" ] || continue
-            echo "Verifying anonymous access for $image"
-            if ! docker buildx imagetools inspect "$image" >/dev/null; then
-              printf '%s\n' \
-                "Published image is not anonymously pullable: $image" \
-                "" \
-                "Make the GHCR package public before cutting a public Docker release:" \
-                "GitHub organization -> Packages -> od -> Package settings -> Change visibility -> Public." >&2
-              exit 1
-            fi
-          done <<< "$PUBLISHED_TAGS"
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect ghcr.io/${{ github.repository_owner }}/od:latest

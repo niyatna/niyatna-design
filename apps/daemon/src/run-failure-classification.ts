@@ -1088,7 +1088,6 @@ function classifyRunFailureBase(
     );
   }
 
-  const serviceFailure = classifyAgentServiceFailure(text);
   if (isEmptyOutputText(text)) {
     return classification(
       'empty_output',

@@ -66,23 +66,23 @@
    (same contract as tokens.css). Surfaces sit on the elevated neutral
    (#353535) so translucent layers still read as lifted off #202020. */
 [data-theme='dark'] {
-  --material-ultrathin: rgba(16, 17, 24, 0.45);
-  --material-thin: rgba(16, 17, 24, 0.65);
-  --material-regular: rgba(16, 17, 24, 0.78);
-  --material-thick: rgba(16, 17, 24, 0.88);
-  --glass-clear: rgba(255, 255, 255, 0.06);
+  --material-ultrathin: rgba(14, 16, 22, 0.45);
+  --material-thin: rgba(14, 16, 22, 0.65);
+  --material-regular: rgba(14, 16, 22, 0.78);
+  --material-thick: rgba(14, 16, 22, 0.90);
+  --glass-clear: rgba(255, 255, 255, 0.05);
   --glass-clear-dim: rgba(0, 0, 0, 0.6);
-  --vibrancy-label: rgba(255, 255, 255, 0.95);
-  --vibrancy-label-secondary: rgba(226, 228, 233, 0.68);
-  --vibrancy-label-tertiary: rgba(157, 161, 176, 0.45);
-  --vibrancy-label-quaternary: rgba(157, 161, 176, 0.26);
-  --vibrancy-fill: rgba(255, 255, 255, 0.18);
-  --vibrancy-fill-secondary: rgba(255, 255, 255, 0.1);
-  --vibrancy-fill-tertiary: rgba(255, 255, 255, 0.05);
-  --material-separator: rgba(255, 255, 255, 0.1);
-  --glass-refract-ring-top: rgba(255, 255, 255, 0.28);
-  --glass-refract-ring-edge: rgba(255, 255, 255, 0.08);
-  --glass-refract-ring-bottom: rgba(255, 255, 255, 0.12);
+  --vibrancy-label: rgba(255, 255, 255, 0.98);
+  --vibrancy-label-secondary: rgba(244, 244, 245, 0.75);
+  --vibrancy-label-tertiary: rgba(161, 161, 170, 0.5);
+  --vibrancy-label-quaternary: rgba(161, 161, 170, 0.3);
+  --vibrancy-fill: rgba(255, 255, 255, 0.12);
+  --vibrancy-fill-secondary: rgba(255, 255, 255, 0.06);
+  --vibrancy-fill-tertiary: rgba(255, 255, 255, 0.03);
+  --material-separator: rgba(255, 255, 255, 0.08);
+  --glass-refract-ring-top: rgba(255, 255, 255, 0.22);
+  --glass-refract-ring-edge: rgba(255, 255, 255, 0.06);
+  --glass-refract-ring-bottom: rgba(255, 255, 255, 0.04);
 }
 
 @media (prefers-color-scheme: dark) {

@@ -3,41 +3,40 @@
    ============================================================ */
 :root {
   color-scheme: dark;
-  --bg: #0b0c10;
-  --bg-app: #0b0c10;
-  --bg-panel: #13141c;
-  --bg-subtle: #1a1b26;
-  --bg-muted: #242634;
-  --bg-fill-tertiary: rgba(255, 255, 255, 0.04);
-  --bg-fill-secondary: rgba(255, 255, 255, 0.08);
-  --bg-fill: rgba(255, 255, 255, 0.14);
-  --bg-elevated: #181924;
-  --glass-regular: rgba(19, 20, 28, 0.75);
+  --bg: #090a0d;
+  --bg-app: #090a0d;
+  --bg-panel: rgba(18, 20, 26, 0.7);
+  --bg-subtle: rgba(26, 29, 38, 0.5);
+  --bg-muted: rgba(22, 24, 32, 0.6);
+  --bg-fill-tertiary: rgba(255, 255, 255, 0.03);
+  --bg-fill-secondary: rgba(255, 255, 255, 0.06);
+  --bg-fill: rgba(255, 255, 255, 0.10);
+  --bg-elevated: rgba(25, 28, 36, 0.8);
+  --glass-regular: rgba(14, 16, 22, 0.75);
   --glass-regular-blur: 24px;
-  --glass-edge-highlight: rgba(255, 255, 255, 0.14);
+  --glass-edge-highlight: rgba(255, 255, 255, 0.18);
   --entry-ground: var(--bg);
-  --border: rgba(255, 255, 255, 0.09);
-  --border-strong: rgba(255, 255, 255, 0.18);
-  --border-selected: rgba(255, 255, 255, 0.3);
-  --border-soft: rgba(255, 255, 255, 0.05);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --border-selected: rgba(255, 255, 255, 0.28);
+  --border-soft: rgba(255, 255, 255, 0.04);
 
-  --text: #e2e4e9;
+  --text: #f4f4f5;
   --text-strong: #ffffff;
-  --text-muted: #9499ad;
-  --text-soft: #6c7287;
-  --text-faint: #474b5c;
+  --text-muted: #a1a1aa;
+  --text-soft: #71717a;
+  --text-faint: #52525b;
 
-  --accent: #f4f4f6;
-  --accent-contrast: #0b0c10;
+  --accent: #ffffff;
+  --accent-contrast: #090a0d;
   --accent-strong: #ffffff;
-  --accent-soft: #242634;
-  --accent-tint: #181924;
+  --accent-soft: rgba(255, 255, 255, 0.08);
+  --accent-tint: rgba(255, 255, 255, 0.04);
   --accent-hover: #ffffff;
-  --brand: #6366f1;
-  --brand-weak: #3730a3;
-  --brand-soft: #1e1b4b;
-  --brand-text: #a5b4fc;
-
+  --brand: #ffffff;
+  --brand-weak: rgba(255, 255, 255, 0.6);
+  --brand-soft: rgba(255, 255, 255, 0.08);
+  --brand-text: #ffffff;
   /* Semantic accent tints used by tool / status pills. */
   --green: #3BBF7D;
   --green-bg: #164111;
@@ -65,10 +64,10 @@
      pill for fully-rounded interactive. Off-scale values (7px, 9px, 10px
      literals) are drift; collapse them to the nearest token. */
   --radius-none: 0px;
-  --radius-small: 2px;
-  --radius-medium: 4px;
-  --radius-large: 8px;
-  --radius-xlarge: 12px;
+  --radius-small: 6px;
+  --radius-medium: 10px;
+  --radius-large: 16px;
+  --radius-xlarge: 22px;
   --radius-circular: 50%;
   --stroke-thin: 1px;
   --stroke-thick: 2px;
@@ -80,7 +79,6 @@
   --radius-md: var(--radius-large);
   --radius-lg: var(--radius-xlarge);
   --radius-pill: 999px;
-
   --duration-ultra-fast: 50ms;
   --duration-faster: 100ms;
   --duration-fast: 150ms;
